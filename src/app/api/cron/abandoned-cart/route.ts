@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { carts, users, products } from "@/lib/db/schema";
-import { eq, and, lt, isNotNull, sql } from "drizzle-orm";
+import { eq, and, lte, isNotNull, sql } from "drizzle-orm";
 import { sendAbandonedCart } from "@/lib/email/send";
 
 /**
  * POST /api/cron/abandoned-cart
  * 
- * Finds carts updated 1-24 hours ago with items, sends recovery emails.
- * Runs hourly via Vercel Cron.
+ * Finds carts updated within the last 24 hours and sends recovery emails.
+ * Runs daily at 10:00 UTC — Vercel Hobby caps each job at one execution
+ * per day. The window tiles exactly against the previous run (lower bound
+ * exclusive, upper bound inclusive) so no cart is skipped and a cart whose
+ * updatedAt was bumped by a prior run is not emailed again.
  */
 export async function POST(request: NextRequest) {
   // Verify cron secret
@@ -19,10 +22,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const now = new Date();
-    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
     const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
-    // Find carts updated between 1 and 24 hours ago
+    // Find carts updated in the 24 hours since the previous run
     const abandonedCarts = await db
       .select({
         cartId: carts.id,
@@ -33,12 +35,12 @@ export async function POST(request: NextRequest) {
       .from(carts)
       .where(
         and(
-          lt(carts.updatedAt, oneHourAgo),
+          lte(carts.updatedAt, now),
           sql`${carts.updatedAt} > ${twentyFourHoursAgo}`,
           isNotNull(carts.userId)
         )
       )
-      .limit(50); // Process max 50 per run
+      .limit(200); // One daily run now covers what 24 hourly runs used to
 
     let sent = 0;
     let failed = 0;
