@@ -1,0 +1,79 @@
+import type { Metadata, Viewport } from "next";
+import { playfair, cormorant, inter } from "@/lib/fonts";
+import { RouteChrome } from "@/components/layout/route-chrome";
+import { StorefrontFooter } from "@/components/layout/storefront-footer";
+import { CartDrawer } from "@/components/cart/cart-drawer";
+import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
+import { InstallPrompt } from "@/components/pwa/install-prompt";
+import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
+import { CookieConsent } from "@/components/analytics/cookie-consent";
+import "@/styles/globals.css";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Nobleman Musical Center — Premium Musical Instruments in Ghana",
+    template: "%s | Nobleman Musical Center",
+  },
+  description:
+    "Ghana's premier destination for premium musical instruments. Trusted by churches, radio stations, schools, and professional musicians. Guitars, keyboards, drums, PA systems, and traditional Ghanaian instruments.",
+  keywords: [
+    "musical instruments Ghana",
+    "guitars Accra",
+    "keyboards Ghana",
+    "drums Accra",
+    "PA systems Ghana",
+    "church instruments",
+    "Nobleman Musical Center",
+  ],
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://noblemanmusical.com"),
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_GH",
+    siteName: "Nobleman Musical Center",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Nobleman",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#060F24",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html
+      lang="en"
+      className={`${playfair.variable} ${cormorant.variable} ${inter.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="min-h-dvh bg-cream font-body text-charcoal antialiased">
+        <RouteChrome />
+        {children}
+        <StorefrontFooter />
+        <CartDrawer />
+        <ServiceWorkerRegistration />
+        <InstallPrompt />
+        <AnalyticsProvider />
+        <CookieConsent />
+      </body>
+    </html>
+  );
+}
