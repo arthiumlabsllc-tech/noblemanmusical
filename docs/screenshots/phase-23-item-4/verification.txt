@@ -1,0 +1,80 @@
+# node scripts/verify-item4.mjs
+# started 2026-09-27T19:41:39.578Z  base http://localhost:3010
+# written as it runs; the LAST line is the exit code, so a file without one is an incomplete run
+
+PASS  footer exists
+PASS  five columns  :: found 5: Follow Us, Shop…
+   columns (links per column; brand block's first heading is its social row): Follow Us(7)  Shop(9)  Company(4)  Support(5)  For Business(4)  | total links 33
+PASS  1. all 24 footer link targets resolve  :: sanctioned 404: /careers
+   expected 404: /careers
+PASS  …/careers carries a data-todo marker  :: todo=phase-23-future
+PASS  4. deep-link anchor exists on its page  :: /returns#warranty
+PASS  5. every social icon has a spoken name beyond 'link'  :: Nobleman Musical Center on Instagram | Nobleman Musical Center on Facebook | Nobleman Musical Center on YouTube | Nobleman Musical Center on WhatsApp
+PASS  …and its icon is aria-hidden
+PASS  …and opens safely (target+rel)
+PASS  …and is a 44px touch target  :: 44,44,44,44px
+PASS  6. payment badges have accessible names  :: Paystack, MTN MoMo, Visa, Mastercard
+PASS  …and are real text, not images  :: 0 <img> in the payment row
+PASS  footer images carry alt + intrinsic size  :: Nobleman Musical Center 180x168
+PASS  footer logo is not eager-prioritised below the fold  :: lazy
+PASS  no unnamed footer links
+PASS  3. the footer contributes no copy of the utility-bar claims  :: Official Warranty=0 | Nationwide Delivery=0 | Pay on Delivery in Accra=0
+PASS  …and no claim appears twice in global chrome  :: Official Warranty=1 | Nationwide Delivery=1 | Pay on Delivery in Accra=1
+   NOTE for Sub-Phase B (not item 4, not caused by the footer): these claims also appear in page content — Official Warranty x1 | Nationwide Delivery x1 | Pay on Delivery in Accra x1 — see TECH_DEBT; the homepage trust strip is Sub-Phase B item 11.
+PASS  newsletter input + submit are wired
+PASS  form named by its own heading, not the input label
+PASS  status region is mounted before it has anything to say
+PASS  input describes the status region
+PASS  input has a real <label for>
+PASS  gold arrow button has a name and a 44px target  :: Subscribe to the newsletter btn=48px input=48px
+   contrast measurement: "Where Music Me" rgb(232, 199, 102) -> rgb(232,199,102) on rgb(6,15,36) = 11.61:1
+   contrast measurement: "Zongo Lane, Ac" oklab(0.956278 0.00139621 0.0142819 / 0.7) -> rgb(173,172,171) on rgb(6,15,36) = 8.46:1
+   contrast measurement: "+233 244 916 0" oklab(0.956278 0.00139621 0.0142819 / 0.7) -> rgb(173,172,171) on rgb(6,15,36) = 8.46:1
+PASS  contrast sampling actually ran  :: 44 text nodes measured (a loop that measures nothing cannot find nothing)
+PASS  footer text meets WCAG AA contrast  :: 44 text nodes measured, worst 6.45:1 ("New arrivals and closeouts, st")
+PASS  11. a malformed address never reaches the server  :: browser refused: "Please include an '@' in the email address. 'not-an-email' is missing an '@'."
+PASS  …button is not left spinning
+PASS  …the field really was emptied first  :: held "not-an-email", now ""
+PASS  …and holds exactly the new address  :: "item4+1790538111578@example.com"
+PASS  12. success message only when the server granted it  :: NOT STORED: "We couldn't sign you up just now. Please try again, or reach us on WhatsApp and we'll add you."
+PASS  …and the pending state is released, not stuck on a spinner  :: aria-busy=null
+   input still holds "item4+1790538111578@example.com"
+
+=== console errors/warnings ===
+  (0 relevant of 0 total)
+=== page exceptions ===
+  (0)
+PASS  no unexplained console errors  :: 0 messages
+PASS  no page exceptions  :: 0 exceptions
+   tab bar breakdown (plain viewport): {"navH":66,"borderTop":1,"rowPad":16,"tabH":49,"tabMinH":"44px","scale":1,"dpr":1}
+   emulated for comparison: {"navH":66,"borderTop":1,"rowPad":16,"tabH":49,"tabMinH":"44px","scale":1,"dpr":2}
+PASS  viewport emulation agrees about pixel geometry  :: emulated 66px (scale 1) vs plain 66px (scale 1); if these diverge, every px number below is measuring the emulator
+PASS  …and --tabbar-h equals border + row padding + tab height, not a guess  :: 1 + 16 + 49 = 66 vs nav 66
+PASS  4. no horizontal scroll at 375  :: 360 vs 360
+   viewport maths: 375 requested -> clientWidth 360 (headless Chrome's 15px classic scrollbar; overlay scrollbars on a real phone give the full 375)
+PASS  …--tabbar-h matches the real tab bar height  :: measured 66px vs --tabbar-h 66px
+PASS  every legal link is tappable over the tab bar + cookie banner  :: 4 links hit-tested
+PASS  …with real space to spare, not 1px  :: gap 90px (consent 122px)
+PASS  …and footer tap targets are >= 24px (WCAG 2.5.8)  :: Privacy Policy:24 Terms of Service:24 Cookie Policy:24 Accessibility:24
+PASS  clearance survives the cookie banner being dismissed  :: last row bottom y=630 of 720, tab bar occupies 66px
+PASS  mobile stack has breathing room (single column, >=32px between, no edge bleed)  :: rowGap 48px, side pad 16px, 1 column(s), children 328–328px in 360px content box (375px innerWidth incl. scrollbar)
+PASS  no horizontal scroll at 768  :: 753 vs 753
+PASS  9. CDP harness present
+PASS  …and documented in scripts/README.md  :: README covers verify-item4.mjs: true / build.mjs: true
+
+=== NOT VERIFIED BY THIS SUITE (blocked, see the item-4 report) ===
+  #2 newsletter DELIVERY — the live neondb has 0 tables and RESEND_API_KEY is
+     blank, so no row is written and no mail leaves. Verified instead: the form
+     never claims a success the server did not grant.
+  #8 Lighthouse >= 90 — no Lighthouse in this repo and none installed; adding it
+     is a dependency decision. Measured proxies instead: logo is lazy with
+     reserved width/height, form status region reserves min-h, 0 route became
+     dynamic, build still prerenders 85/85.
+
+
+=== SUMMARY ===
+44/44 passed
+
+screenshots -> D:\Arthium Labs LLC\NMC\docs\screenshots\phase-23-item-4
+
+exit 0 — all 44 checks passed

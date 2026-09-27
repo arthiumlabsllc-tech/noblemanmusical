@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { PolicyLayout } from "@/components/content/policy-layout";
+import { SITE } from "@/lib/seo/config";
+import { buildWhatsAppUrl } from "@/lib/whatsapp/build-url";
 
 export const metadata: Metadata = {
   title: "Returns & Refunds — Nobleman Musical Center",
@@ -42,13 +44,30 @@ export default function ReturnsPage() {
       <h2 className="text-lg font-bold text-navy-deep">5. Exchanges</h2>
       <p>Want a different size, color, or model? We&apos;re happy to exchange items subject to availability. Contact us to arrange an exchange.</p>
 
-      <h2 className="text-lg font-bold text-navy-deep">6. Warranty Claims</h2>
-      <p>For manufacturer warranty issues (beyond 7 days), contact us with your order number and a description of the issue. We&apos;ll coordinate with the manufacturer on your behalf.</p>
+      {/* Anchored: the footer links "Warranty" to /returns#warranty so both the
+          Returns and Warranty entries in §5.1 land on the paragraph that
+          answers the question, instead of duplicating one link twice.
+          scroll-mt-32 keeps the fixed utility bar + navbar from covering the
+          heading the fragment just scrolled to. */}
+      <section id="warranty" className="scroll-mt-32">
+        <h2 className="text-lg font-bold text-navy-deep">6. Warranty Claims</h2>
+        <p>For manufacturer warranty issues (beyond 7 days), contact us with your order number and a description of the issue. We&apos;ll coordinate with the manufacturer on your behalf.</p>
+      </section>
 
       <h2 className="text-lg font-bold text-navy-deep">7. Contact</h2>
       <p>For returns or exchanges, reach us via:</p>
       <ul className="ml-4 list-disc space-y-1">
-        <li>WhatsApp: {process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "+233 244 916 034"}</li>
+        {/* Link and displayed number both derive from `@/lib/config`, so the
+            digits behind the href can never disagree with the text. */}
+        <li>
+          WhatsApp:{" "}
+          <a
+            href={buildWhatsAppUrl()}
+            className="text-gold-dark underline decoration-gold/40 underline-offset-2 hover:decoration-gold"
+          >
+            {SITE.contact.phone}
+          </a>
+        </li>
         <li>Email: returns@noblemanmusical.com</li>
         <li>In person: Nobleman Musical Center, Accra</li>
       </ul>

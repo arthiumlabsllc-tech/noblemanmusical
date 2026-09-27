@@ -67,9 +67,3 @@ export function getInitials(name: string): string {
     .toUpperCase()
     .slice(0, 2);
 }
-
-/** Build WhatsApp message URL */
-export function whatsappUrl(phone: string, message: string): string {
-  const cleaned = phone.replace(/[^0-9]/g, "");
-  return `https://wa.me/${cleaned}?text=${encodeURIComponent(message)}`;
-}

@@ -18,7 +18,7 @@ export function PolicyLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-cream pt-20 lg:pt-24">
+    <div className="min-h-screen bg-cream pt-chrome">
       <div className="bg-navy-deep py-10 md:py-14">
         <div className="mx-auto max-w-3xl px-4 md:px-6">
           <Link href="/" className="mb-4 inline-flex items-center gap-1 text-sm text-cream/60 hover:text-cream">

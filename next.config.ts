@@ -25,7 +25,14 @@ const nextConfig: NextConfig = {
           key: "Content-Security-Policy",
           value: [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+            // googletagmanager.com must be allowlisted here or CSP silently
+            // blocks gtag.js and GA4 records zero pageviews. Verified against
+            // this config: `next dev` applies the `headers` block too, so a
+            // missing allowlist breaks dev analytics exactly like production.
+            // va.vercel-scripts.com is Vercel Web Analytics + Speed Insights;
+            // confirmed CSP-blocked in the browser, which is why both were
+            // reporting no data while the code looked correctly wired up.
+            "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://*.googletagmanager.com https://va.vercel-scripts.com",
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' blob: data: https:",
             "font-src 'self' data:",

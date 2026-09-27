@@ -79,4 +79,13 @@ export const limits = {
 
   /** Order tracking */
   tracking: (ip: string) => rateLimit(`track:${ip}`, 10, 60 * 1000), // 10 per minute
+
+  /**
+   * Newsletter signup. Low and deliberately: the form is in the global footer,
+   * so it is the most exposed write endpoint on the site, and it triggers an
+   * outbound email — an unthrottled version is both a storage-spam and a
+   * sending-quota problem. Five attempts per quarter-hour is far more than a
+   * real shopper submitting twice (typo, then correction) needs.
+   */
+  newsletter: (ip: string) => rateLimit(`nl:${ip}`, 5, 15 * 60 * 1000), // 5 per 15min
 };

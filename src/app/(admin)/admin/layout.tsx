@@ -7,6 +7,9 @@ export const metadata: Metadata = {
     template: "%s | Nobleman Admin",
     default: "Admin",
   },
+  // Belt-and-braces against middleware: the admin app is behind an auth wall,
+  // but a stray indexed page would leak its existence into search results.
+  robots: { index: false, follow: false },
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

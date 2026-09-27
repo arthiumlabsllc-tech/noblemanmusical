@@ -4,10 +4,20 @@ import { useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Check, MessageCircle, ShoppingBag } from "lucide-react";
+import { trackPurchase } from "@/lib/analytics/events";
+import { buildWhatsAppUrl } from "@/lib/whatsapp/build-url";
+import { takePurchase } from "@/lib/analytics/purchase-handoff";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
   const orderNumber = searchParams.get("order") || "NMC-0000";
+
+  // GA4 purchase. Consume-and-delete means a refresh or a re-opened
+  // confirmation page cannot count the same order twice.
+  useEffect(() => {
+    const order = takePurchase();
+    if (order) trackPurchase(order);
+  }, []);
 
   useEffect(() => {
     // Gold confetti burst
@@ -65,7 +75,7 @@ function SuccessContent() {
             Continue Shopping
           </Link>
           <a
-            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "233244916034"}?text=${encodeURIComponent(`Hi, I just placed an order: ${orderNumber}`)}`}
+            href={buildWhatsAppUrl({ message: `Hi, I just placed an order: ${orderNumber}` })}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 rounded-lg border border-cream-dark py-3.5 font-medium text-charcoal hover:bg-cream-dark"

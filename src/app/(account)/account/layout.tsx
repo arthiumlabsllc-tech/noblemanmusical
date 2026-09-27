@@ -7,6 +7,8 @@ export const metadata: Metadata = {
     template: "%s | My Account",
     default: "Account",
   },
+  // Personalised order/address data must never reach a search index.
+  robots: { index: false, follow: false },
 };
 
 export default function AccountLayout({ children }: { children: React.ReactNode }) {

@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "About Us", description: "Learn about
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-cream pt-20 lg:pt-24">
+    <div className="min-h-screen bg-cream pt-chrome">
       <div className="bg-navy-deep py-16 md:py-24">
         <div className="mx-auto max-w-4xl px-4 text-center md:px-6">
           <RevealOnScroll>

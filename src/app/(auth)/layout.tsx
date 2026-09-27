@@ -1,6 +1,13 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Logo } from "@/components/brand/logo";
 import { ArrowLeft } from "lucide-react";
+
+export const metadata: Metadata = {
+  // Auth and checkout are functional surfaces with no indexable content, and
+  // Google has said plainly that login pages should not appear in results.
+  robots: { index: false, follow: false },
+};
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -14,6 +14,7 @@ import {
 import { eq, desc, sql, and, like, or, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { requireAdmin } from "@/lib/auth/guard";
 
 /* ═══════════════════════════════════════════════════════════
    Products CRUD
@@ -46,6 +47,7 @@ export async function getAdminProducts(params?: {
   categoryId?: string;
   brandId?: string;
 }) {
+  await requireAdmin();
   const page = params?.page ?? 1;
   const perPage = params?.perPage ?? 20;
   const offset = (page - 1) * perPage;
@@ -103,6 +105,7 @@ export async function getAdminProducts(params?: {
 }
 
 export async function getAdminProduct(id: string) {
+  await requireAdmin();
   const result = await db
     .select()
     .from(products)
@@ -112,6 +115,7 @@ export async function getAdminProduct(id: string) {
 }
 
 export async function createProduct(formData: FormData) {
+  await requireAdmin();
   const data = productSchema.parse({
     name: formData.get("name"),
     slug: formData.get("slug"),
@@ -138,6 +142,7 @@ export async function createProduct(formData: FormData) {
 }
 
 export async function updateProduct(id: string, formData: FormData) {
+  await requireAdmin();
   const data = productSchema.parse({
     name: formData.get("name"),
     slug: formData.get("slug"),
@@ -168,6 +173,7 @@ export async function updateProduct(id: string, formData: FormData) {
 }
 
 export async function deleteProduct(id: string) {
+  await requireAdmin();
   await db.delete(products).where(eq(products.id, id));
   revalidatePath("/admin/products");
   return { success: true };
@@ -183,6 +189,7 @@ export async function getAdminOrders(params?: {
   status?: string;
   search?: string;
 }) {
+  await requireAdmin();
   const page = params?.page ?? 1;
   const perPage = params?.perPage ?? 20;
   const offset = (page - 1) * perPage;
@@ -225,6 +232,7 @@ export async function getAdminOrders(params?: {
 }
 
 export async function getAdminOrder(id: string) {
+  await requireAdmin();
   const [orderResult, items] = await Promise.all([
     db.select().from(orders).where(eq(orders.id, id)).limit(1),
     db
@@ -236,6 +244,7 @@ export async function getAdminOrder(id: string) {
 }
 
 export async function updateOrderStatus(orderId: string, status: string) {
+  await requireAdmin();
   const validStatuses = ["pending", "paid", "processing", "shipped", "delivered", "cancelled", "refunded"] as const;
   if (!validStatuses.includes(status as typeof validStatuses[number])) {
     throw new Error("Invalid status");
@@ -264,10 +273,12 @@ const categorySchema = z.object({
 });
 
 export async function getAdminCategories() {
+  await requireAdmin();
   return db.select().from(categories).orderBy(categories.sortOrder);
 }
 
 export async function createCategory(formData: FormData) {
+  await requireAdmin();
   const data = categorySchema.parse({
     name: formData.get("name"),
     slug: formData.get("slug"),
@@ -283,6 +294,7 @@ export async function createCategory(formData: FormData) {
 }
 
 export async function updateCategory(id: string, formData: FormData) {
+  await requireAdmin();
   const data = categorySchema.parse({
     name: formData.get("name"),
     slug: formData.get("slug"),
@@ -298,6 +310,7 @@ export async function updateCategory(id: string, formData: FormData) {
 }
 
 export async function deleteCategory(id: string) {
+  await requireAdmin();
   await db.delete(categories).where(eq(categories.id, id));
   revalidatePath("/admin/categories");
   return { success: true };
@@ -315,10 +328,12 @@ const brandSchema = z.object({
 });
 
 export async function getAdminBrands() {
+  await requireAdmin();
   return db.select().from(brands).orderBy(brands.name);
 }
 
 export async function createBrand(formData: FormData) {
+  await requireAdmin();
   const data = brandSchema.parse({
     name: formData.get("name"),
     slug: formData.get("slug"),
@@ -332,6 +347,7 @@ export async function createBrand(formData: FormData) {
 }
 
 export async function deleteBrand(id: string) {
+  await requireAdmin();
   await db.delete(brands).where(eq(brands.id, id));
   revalidatePath("/admin/products");
   return { success: true };
@@ -346,6 +362,7 @@ export async function getAdminQuotes(params?: {
   perPage?: number;
   status?: string;
 }) {
+  await requireAdmin();
   const page = params?.page ?? 1;
   const perPage = params?.perPage ?? 20;
   const offset = (page - 1) * perPage;
@@ -377,6 +394,7 @@ export async function getAdminQuotes(params?: {
 }
 
 export async function updateQuoteStatus(quoteId: string, status: string, quotedAmount?: number) {
+  await requireAdmin();
   const validStatuses = ["new", "sent", "won", "lost"] as const;
   if (!validStatuses.includes(status as typeof validStatuses[number])) {
     throw new Error("Invalid status");
@@ -409,10 +427,12 @@ const discountSchema = z.object({
 });
 
 export async function getAdminDiscounts() {
+  await requireAdmin();
   return db.select().from(discounts).orderBy(discounts.code);
 }
 
 export async function createDiscount(formData: FormData) {
+  await requireAdmin();
   const data = discountSchema.parse({
     code: formData.get("code"),
     type: formData.get("type"),
@@ -434,6 +454,7 @@ export async function createDiscount(formData: FormData) {
 }
 
 export async function updateDiscount(id: string, formData: FormData) {
+  await requireAdmin();
   const data = discountSchema.parse({
     code: formData.get("code"),
     type: formData.get("type"),
@@ -458,6 +479,7 @@ export async function updateDiscount(id: string, formData: FormData) {
 }
 
 export async function deleteDiscount(id: string) {
+  await requireAdmin();
   await db.delete(discounts).where(eq(discounts.id, id));
   revalidatePath("/admin/discounts");
   return { success: true };
@@ -472,6 +494,7 @@ export async function getAdminCustomers(params?: {
   perPage?: number;
   search?: string;
 }) {
+  await requireAdmin();
   const page = params?.page ?? 1;
   const perPage = params?.perPage ?? 20;
   const offset = (page - 1) * perPage;
@@ -524,6 +547,7 @@ export async function getAdminCustomers(params?: {
    ═══════════════════════════════════════════════════════════ */
 
 export async function getLowStockProducts() {
+  await requireAdmin();
   return db
     .select({
       id: products.id,
@@ -541,6 +565,7 @@ export async function getLowStockProducts() {
 }
 
 export async function updateProductStock(productId: string, stock: number) {
+  await requireAdmin();
   await db
     .update(products)
     .set({ stock, updatedAt: new Date() })
@@ -554,6 +579,7 @@ export async function updateProductStock(productId: string, stock: number) {
    ═══════════════════════════════════════════════════════════ */
 
 export async function getAdminStats() {
+  await requireAdmin();
   const [totalRevenue, totalOrders, totalCustomers, totalProducts, lowStockCount] = await Promise.all([
     db
       .select({ total: sql<number>`coalesce(sum(${orders.total}), 0)::int` })

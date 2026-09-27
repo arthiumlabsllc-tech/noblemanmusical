@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { XCircle, MessageCircle, RotateCcw } from "lucide-react";
+import { buildWhatsAppUrl } from "@/lib/whatsapp/build-url";
 
 export default function CheckoutFailedPage() {
   return (
@@ -34,7 +35,7 @@ export default function CheckoutFailedPage() {
             Try Again
           </Link>
           <a
-            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "233244916034"}?text=${encodeURIComponent("Hi, I had an issue with my payment on Nobleman Musical Center. Can you help?")}`}
+            href={buildWhatsAppUrl({ message: "Hi, I had an issue with my payment on Nobleman Musical Center. Can you help?" })}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 rounded-lg border border-cream-dark py-3.5 font-medium text-charcoal hover:bg-cream-dark"

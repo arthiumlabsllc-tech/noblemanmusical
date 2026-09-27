@@ -1,0 +1,98 @@
+== TEST 1 desktop 1440x900 ==: undefined
+viewport: {"innerWidth":1440,"innerHeight":900}
+trigger aria: {"label":"DEPARTMENTS","expanded":"false","haspopup":"true","controls":"mega-menu","tag":"BUTTON"}
+navbar row fit: {"scrollWidth":1280,"clientWidth":1280,"overflowing":false,"links":["HOME","DEPARTMENTS","SHOP","DEALS","ABOUT","CONTACT"]}
+screenshot: 01-desktop-closed.png
+panel computed: {"display":"block","bg":"rgb(245, 240, 230)","borderTop":"2px rgb(212, 175, 55) solid","position":"absolute","maxHeight":"560px","zIndex":"60","borderRadiusBottom":"24px","opacity":"1","rect":"{\"x\":0,\"y\":108,\"width\":1440,\"height\":526.65625,\"top\":108,\"right\":1440,\"bottom\":634.65625,\"left\":0}"}
+columns: {"distinctXColumns":3,"childCount":3,"gridClass":"grid grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)_minmax(0,1.4fr)] gap-8"}
+panel text: Guitars
+8
+Keyboards & Pianos
+6
+Drums & Percussion
+5
+PA & Live Sound
+5
+Studio & Recording
+4
+Traditional Ghanaian
+4
+Accessories
+4
+GUITARS
+Acoustic Guitars2
+Electric Guitars4
+Classical Guitars1
+Bass Guitars1
+See all Guitars
+Acoustic, electric, classical and bass
+FEATURED DEAL
+Pearl Export 5-Piece Drum Kit
+Save 11% — was ₵11,000.00
+₵9,800.00
+Shop Now
+View All Products
+Brands A–Z
+dept row geometry: [{"h":52,"text":"Guitars 8"},{"h":52,"text":"Keyboards & Pianos 6"},{"h":52,"text":"Drums & Percussion 5"},{"h":52,"text":"PA & Live Sound 5"},{"h":52,"text":"Studio & Recording 4"},{"h":52,"text":"Traditional Ghanaian 4"},{"h":52,"text":"Accessories 4"},{"h":17,"text":"Acoustic Guitars2"},{"h":17,"text":"Electric Guitars4"},{"h":17,"text":"Classical Guitars1"}]
+chevron rotation: {"transform":"none","cls":"lucide lucide-chevron-down h-3.5 w-3.5 transition-transform duration-200 rotate-180"}
+screenshot: 02-desktop-open.png
+== TEST 2 hover column swap ==: undefined
+column2 before: 32,392,949 ||| GUITARS Acoustic Guitars2 Electric Guitars4 Classical Guitars1 Bass Guitars1 See all Guitars Acoustic, electric, classical and bass
+target row: {"x":72,"y":280,"label":"Drums & Percussion 5"}
+column2 after hover: 32,392,949 ||| DRUMS & PERCUSSION Acoustic Drum Kits3 Electronic Drum Kits1 Cymbals1 Snares & Percussion1 Sticks & Heads2 See all Drums & Percussion Kits, electronic drums and
+active row styling: {"bg":"oklab(0.766529 -0.00252706 0.138662 / 0.1)","borderLeft":"2px oklab(0.766529 -0.00252706 0.138662 / 0.4)"}
+screenshot: 03-desktop-hover.png
+== TEST 3 close triggers ==: undefined
+aria-expanded after ESC: false
+panel in DOM after ESC: false
+aria-expanded after click-open: true
+aria-expanded after outside click: false
+aria-expanded after keyboard Enter: dispatched
+aria-expanded now: true
+aria-expanded after nav: false
+url after nav: /shop/guitars
+== TEST 4 filter routes ==: undefined
+/shop?deals=true: {"h1":"Shop All Instruments","showing":"Showing 12 product","productAnchors":12,"facetChips":["Guitars\n8","On sale only\nRemove sale filter"]}
+/shop/guitars: {"h1":"Guitars","showing":"Showing 8 product","productAnchors":8,"facetChips":["Clear All Filters"]}
+/shop/guitars?sub=electric: {"h1":"Guitars","showing":"Showing 4 product","productAnchors":4,"facetChips":["Clear All Filters","Electric Guitars\nRemove Electric Guitars filter"]}
+screenshot: 04-deals-filter.png
+== TEST 5 tablet 768x1024 ==: undefined
+viewport: 768
+mega trigger display: {"triggerVisible":false,"navDisplay":"flex"}
+hamburger: {"label":"Open menu","visible":true}
+screenshot: 05-tablet-768.png
+drawer open: clicked
+drawer role/modal: {"ariaModal":"true","label":"Main navigation","visible":true}
+screenshot: 06-tablet-drawer.png
+accordion: [{"label":"Guitars 8","expanded":"false","h":48},{"label":"Keyboards & Pianos 6","expanded":"false","h":48},{"label":"Drums & Percussion 5","expanded":"false","h":48},{"label":"PA & Live Sound 5","expanded":"false","h":48},{"label":"Studio & Recording 4","expanded":"false","h":48},{"label":"Traditional Ghanaian 4","expanded":"false","h":48},{"label":"Accessories 4","expanded":"false","h":48}]
+expand guitars: clicked
+sub rows: [{"text":"Acoustic Guitars 2","h":48,"href":"/shop/guitars?sub=acoustic"},{"text":"Electric Guitars 4","h":48,"href":"/shop/guitars?sub=electric"},{"text":"Classical Guitars 1","h":48,"href":"/shop/guitars?sub=classical"},{"text":"Bass Guitars 1","h":48,"href":"/shop/guitars?sub=bass"}]
+screenshot: 07-tablet-accordion.png
+== TEST 6 mobile 375x812 ==: undefined
+viewport: 375
+horizontal overflow: {"docWidth":375,"winWidth":375,"overflowing":false}
+screenshot: 08-mobile-home.png
+drawer: opened
+mobile overflow with drawer: {"docWidth":375,"winWidth":375}
+drawer scroll lock: {"bodyOverflow":"hidden","bodyH":8658,"htmlScrollTop":0}
+screenshot: 09-mobile-drawer.png
+expand drums: ok
+screenshot: 10-mobile-accordion.png
+touch targets < 44px: ["@40","@40","@40","@40"]
+GET /brands status: 404
+== CONSOLE ERRORS/WARNINGS ==: undefined
+
+--- CONSOLE ---
+[log.warning] other http://localhost:3010/manifest.webmanifest :: Manifest: Enctype should be set to either application/x-www-form-urlencoded or multipart/form-data. It currently defaults to application/x-www-form-urlencoded
+[log.error] network http://localhost:3010/_vercel/insights/script.js :: Failed to load resource: the server responded with a status of 404 (Not Found)
+[log.error] security http://localhost:3010/ :: Refused to execute script from 'http://localhost:3010/_vercel/insights/script.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
+[log.error] network http://localhost:3010/_vercel/speed-insights/script.js :: Failed to load resource: the server responded with a status of 404 (Not Found)
+[log.error] security http://localhost:3010/ :: Refused to execute script from 'http://localhost:3010/_vercel/speed-insights/script.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
+[log.error] network http://localhost:3010/brands?_rsc=SCJVgjZa56qhWaZb :: Failed to load resource: the server responded with a status of 404 (Not Found)
+[log.warning] other http://localhost:3010/_next/static/chunks/218-1247835890242527.js :: A preload for 'https://www.googletagmanager.com/gtag/js?id=G-BEXHHVY7DV' is found, but is not used because it is a cross-world service worker resource mismatch.
+[log.error] security http://localhost:3010/shop?deals=true :: Refused to execute script from 'http://localhost:3010/_vercel/insights/script.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
+[log.error] security http://localhost:3010/shop?deals=true :: Refused to execute script from 'http://localhost:3010/_vercel/speed-insights/script.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
+[log.error] security http://localhost:3010/shop/guitars :: Refused to execute script from 'http://localhost:3010/_vercel/insights/script.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
+[log.error] security http://localhost:3010/shop/guitars :: Refused to execute script from 'http://localhost:3010/_vercel/speed-insights/script.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
+[log.error] security http://localhost:3010/shop/guitars?sub=electric :: Refused to execute script from 'http://localhost:3010/_vercel/insights/script.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.
+[log.error] security http://localhost:3010/shop/guitars?sub=electric :: Refused to execute script from 'http://localhost:3010/_vercel/speed-insights/script.js' because its MIME type ('text/html') is not executable, and strict MIME type checking is enabled.

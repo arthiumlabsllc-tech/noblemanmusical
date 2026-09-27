@@ -12,7 +12,7 @@ interface B2BPageConfig {
 
 export function B2BPageLayout({ title, subtitle, description, benefits, orgType }: B2BPageConfig) {
   return (
-    <div className="min-h-screen bg-cream pt-20 lg:pt-24">
+    <div className="min-h-screen bg-cream pt-chrome">
       {/* Hero */}
       <div className="bg-navy-deep py-16 md:py-24">
         <div className="mx-auto max-w-4xl px-4 text-center md:px-6">

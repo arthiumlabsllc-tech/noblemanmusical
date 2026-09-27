@@ -1,4 +1,11 @@
-/* ── Temporary seed data — will be replaced by DB queries ── */
+/* ── Temporary seed data — will be replaced by DB queries ──
+ *
+ * `images` are Unsplash placeholders until the Cloudinary upload pipeline
+ * (admin product editing) replaces them. They rot silently, so treat them as
+ * external dependencies: 3 of the 15 distinct URLs were returning 404, which
+ * blanked 7 products' photos — including the mega menu's featured card. Those
+ * were swapped for live photos of the same instrument class. Re-check with a
+ * HEAD request per distinct URL before launch. See docs/TECH_DEBT.md. */
 
 export interface SeedProduct {
   slug: string;
@@ -101,7 +108,7 @@ export const products: SeedProduct[] = [
     categoryId: "guitars",
     categorySlug: "guitars",
     categoryName: "Guitars",
-    images: ["https://images.unsplash.com/photo-1556449895-a33c9dba63dd?q=80&w=800&auto=format&fit=crop"],
+    images: ["https://images.unsplash.com/photo-1550985616-10810253b84d?q=80&w=800&auto=format&fit=crop"],
     stock: 6,
     isFeatured: false,
     description: "The Ibanez GRG121DX is a powerful entry-level guitar with high-output Infinity R pickups and a fast, slim GRG neck. Perfect for rock and metal players.",
@@ -119,7 +126,7 @@ export const products: SeedProduct[] = [
     categoryId: "guitars",
     categorySlug: "guitars",
     categoryName: "Guitars",
-    images: ["https://images.unsplash.com/photo-1550985543-f47f38aee65d?q=80&w=800&auto=format&fit=crop"],
+    images: ["https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=800&auto=format&fit=crop"],
     stock: 9,
     isFeatured: false,
     description: "The Cort Earth 70 offers exceptional value with a solid spruce top and mahogany back and sides. Rich, warm tone suitable for all playing styles.",
@@ -155,7 +162,7 @@ export const products: SeedProduct[] = [
     categoryId: "guitars",
     categorySlug: "guitars",
     categoryName: "Guitars",
-    images: ["https://images.unsplash.com/photo-1556449895-a33c9dba63dd?q=80&w=800&auto=format&fit=crop"],
+    images: ["https://images.unsplash.com/photo-1550985616-10810253b84d?q=80&w=800&auto=format&fit=crop"],
     stock: 4,
     isFeatured: true,
     description: "The Epiphone Les Paul Standard 60s captures the legendary tone of the original with Alnico Classic humbuckers and a mahogany body with carved maple top.",
@@ -321,7 +328,7 @@ export const products: SeedProduct[] = [
     categoryId: "drums-percussion",
     categorySlug: "drums-percussion",
     categoryName: "Drums & Percussion",
-    images: ["https://images.unsplash.com/photo-1543443374-b6fe10a62229?q=80&w=800&auto=format&fit=crop"],
+    images: ["https://images.unsplash.com/photo-1519892300165-cb5542fb47c7?q=80&w=800&auto=format&fit=crop"],
     stock: 3,
     isFeatured: false,
     description: "The Pearl Export is the world's best-selling entry-level drum kit. Features poplar/mahogany shells and 830 Series hardware for reliable performance.",
@@ -357,7 +364,7 @@ export const products: SeedProduct[] = [
     categoryId: "drums-percussion",
     categorySlug: "drums-percussion",
     categoryName: "Drums & Percussion",
-    images: ["https://images.unsplash.com/photo-1543443374-b6fe10a62229?q=80&w=800&auto=format&fit=crop"],
+    images: ["https://images.unsplash.com/photo-1519892300165-cb5542fb47c7?q=80&w=800&auto=format&fit=crop"],
     stock: 50,
     isFeatured: false,
     description: "The Vic Firth American Classic 5A is the most popular drumstick in the world. Made from hickory with a teardrop wood tip for warm cymbal sound.",
@@ -579,7 +586,7 @@ export const products: SeedProduct[] = [
     categoryId: "traditional-ghanaian",
     categorySlug: "traditional-ghanaian",
     categoryName: "Traditional Ghanaian",
-    images: ["https://images.unsplash.com/photo-1543443374-b6fe10a62229?q=80&w=800&auto=format&fit=crop"],
+    images: ["https://images.unsplash.com/photo-1519892300165-cb5542fb47c7?q=80&w=800&auto=format&fit=crop"],
     stock: 8,
     isFeatured: false,
     description: "Authentic Ghanaian talking drum (Donno) with carved hardwood body and leather tension cords. Produces the characteristic talking tones of West African music.",
@@ -615,7 +622,7 @@ export const products: SeedProduct[] = [
     categoryId: "traditional-ghanaian",
     categorySlug: "traditional-ghanaian",
     categoryName: "Traditional Ghanaian",
-    images: ["https://images.unsplash.com/photo-1543443374-b6fe10a62229?q=80&w=800&auto=format&fit=crop"],
+    images: ["https://images.unsplash.com/photo-1519892300165-cb5542fb47c7?q=80&w=800&auto=format&fit=crop"],
     stock: 12,
     isFeatured: false,
     description: "The Atenteben is a traditional Ghanaian bamboo flute used in highlife and traditional music. Hand-crafted from local bamboo with a clear, haunting tone.",

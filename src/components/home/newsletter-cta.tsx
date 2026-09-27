@@ -4,16 +4,42 @@ import { RevealOnScroll } from "@/components/motion/reveal-on-scroll";
 import { ShimmerButton } from "@/components/motion/shimmer-button";
 import { Mail } from "lucide-react";
 import { useState } from "react";
+import { subscribeToNewsletter } from "@/lib/newsletter/actions";
+import { trackNewsletterSignup } from "@/lib/analytics/events";
 
+/**
+ * Homepage newsletter.
+ *
+ * Wired to the same `subscribeToNewsletter` action as `<FooterNewsletter />` in
+ * item 4. Until now this form called `setSubmitted(true)` and stored nothing —
+ * it told every visitor "check your inbox" and sent nothing, which is a worse
+ * outcome than not showing a form. The item-4 action made the fix three lines.
+ *
+ * The copy is deliberately not the footer's. §1.14 restyles this section in
+ * Sub-Phase B and §5.1 owns the footer version; whether the homepage keeps its
+ * own CTA once a footer signup exists on every page is an open question raised
+ * in the item-4 report, not decided here.
+ */
 export function NewsletterCTA() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // TODO: Server action to subscribe
-    setSubmitted(true);
-  };
+    if (pending) return;
+    setPending(true);
+    setError("");
+    const result = await subscribeToNewsletter({ email, source: "homepage" });
+    setPending(false);
+    if (result.ok) {
+      setSubmitted(true);
+      trackNewsletterSignup();
+    } else {
+      setError(result.error ?? "Please check the address and try again.");
+    }
+  }
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-cream to-cream-dark py-20 md:py-28">
@@ -33,7 +59,8 @@ export function NewsletterCTA() {
           {submitted ? (
             <div className="mt-8 rounded-xl border border-kente-green/30 bg-kente-green/5 p-6">
               <p className="font-medium text-kente-green">
-                Welcome to the Circle. Check your inbox for a confirmation.
+                You&apos;re on the list. New arrivals and deals will reach you
+                first.
               </p>
             </div>
           ) : (
@@ -43,13 +70,25 @@ export function NewsletterCTA() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
+                aria-label="Email address for the newsletter"
+                autoComplete="email"
                 required
+                disabled={pending}
                 className="flex-1 rounded-lg border border-cream-dark bg-white px-5 py-3.5 text-sm text-charcoal placeholder:text-charcoal/60 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/20"
               />
-              <ShimmerButton type="submit" size="lg" className="whitespace-nowrap">
-                Subscribe
+              <ShimmerButton type="submit" size="lg" className="whitespace-nowrap" disabled={pending}>
+                {pending ? "Joining…" : "Subscribe"}
               </ShimmerButton>
             </form>
+          )}
+          {error && (
+            /* role="alert" on an element that appears with text: the region is
+               created at the same moment as its content, which is what an alert
+               role is for (a live region added empty and filled later is the
+               case that AT handles inconsistently). */
+            <p role="alert" className="mt-4 text-sm text-kente-red">
+              {error}
+            </p>
           )}
         </RevealOnScroll>
       </div>

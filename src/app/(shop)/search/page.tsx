@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ProductCard } from "@/components/product/product-card";
+import { buildWhatsAppUrl } from "@/lib/whatsapp/build-url";
 import { RevealOnScroll } from "@/components/motion/reveal-on-scroll";
 import { Search as SearchIcon, X, MessageCircle, SlidersHorizontal, ChevronDown } from "lucide-react";
 
@@ -95,7 +96,7 @@ function SearchContent() {
   }
 
   return (
-    <div className="min-h-screen bg-cream pt-20 lg:pt-24">
+    <div className="min-h-screen bg-cream pt-chrome">
       {/* Hero Search */}
       <div className="bg-navy-deep py-12 md:py-16">
         <div className="mx-auto max-w-3xl px-4 md:px-6">
@@ -243,7 +244,7 @@ function SearchContent() {
               Try a different search term or browse our categories.
             </p>
             <a
-              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "233244916034"}?text=${encodeURIComponent(`Hi, I'm looking for: ${query}`)}`}
+              href={buildWhatsAppUrl({ message: `Hi, I'm looking for: ${query}` })}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-6 inline-flex items-center gap-2 rounded-lg bg-gold px-6 py-3 font-semibold text-navy-deep hover:bg-gold-light"

@@ -6,10 +6,17 @@ import { CartDrawer } from "@/components/cart/cart-drawer";
 import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
 import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
+import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { CookieConsent } from "@/components/analytics/cookie-consent";
+import { SiteJsonLd } from "@/components/seo/json-ld";
+import { absoluteUrl } from "@/lib/seo/config";
+import { megaMenuFeature, storefrontDepartments } from "@/lib/data/storefront-nav";
 import "@/styles/globals.css";
 
+const siteVerificationGoogle = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
+
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://noblemanmusical.com"),
   title: {
     default: "Nobleman Musical Center — Premium Musical Instruments in Ghana",
     template: "%s | Nobleman Musical Center",
@@ -25,7 +32,30 @@ export const metadata: Metadata = {
     "church instruments",
     "Nobleman Musical Center",
   ],
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://noblemanmusical.com"),
+  // Every page inherits this canonical unless it overrides with its own.
+  alternates: {
+    canonical: "/",
+  },
+  // Google's crawler needs index+follow by default; private route groups
+  // override this with noindex in their own layouts.
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      // Snippet/image/video caps left generous — thin results hurt more than
+      // long ones help. These keys are kebab-cased because Next emits them
+      // verbatim into the robots meta content.
+      "max-snippet": -1,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+    },
+  },
+  verification: siteVerificationGoogle
+    ? { google: siteVerificationGoogle }
+    : undefined,
+  category: "shopping",
   icons: {
     icon: "/favicon.ico",
     apple: "/favicon.ico",
@@ -34,6 +64,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_GH",
     siteName: "Nobleman Musical Center",
+    url: absoluteUrl("/"),
   },
   twitter: {
     card: "summary_large_image",
@@ -65,13 +96,17 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-dvh bg-cream font-body text-charcoal antialiased">
-        <RouteChrome />
+        {/* Entity graph — one copy for every page, referenced by @id from the
+            per-page Product / BlogPosting / Breadcrumb builders. */}
+        <SiteJsonLd />
+        <RouteChrome departments={storefrontDepartments} feature={megaMenuFeature} />
         {children}
         <StorefrontFooter />
         <CartDrawer />
         <ServiceWorkerRegistration />
         <InstallPrompt />
         <AnalyticsProvider />
+        <GoogleAnalytics />
         <CookieConsent />
       </body>
     </html>

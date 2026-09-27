@@ -1,6 +1,14 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Logo } from "@/components/brand/logo";
 import { Lock } from "lucide-react";
+
+export const metadata: Metadata = {
+  // Cart and checkout are per-session and thin, so they must not be indexed —
+  // but `follow` stays on so these pages still pass link equity back to the
+  // catalogue via "Continue shopping".
+  robots: { index: false, follow: true },
+};
 
 export default function CheckoutLayout({ children }: { children: React.ReactNode }) {
   return (

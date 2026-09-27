@@ -13,6 +13,7 @@ import {
   Row,
   Link,
 } from "@react-email/components";
+import { buildWhatsAppUrl } from "@/lib/whatsapp/build-url";
 
 interface OrderConfirmationEmailProps {
   orderNumber: string;
@@ -130,7 +131,7 @@ export function OrderConfirmationEmail({
             {/* WhatsApp CTA */}
             <Section className="my-6 text-center">
               <Link
-                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "233244916034"}?text=${encodeURIComponent(`Hi, I have a question about order ${orderNumber}`)}`}
+                href={buildWhatsAppUrl({ message: `Hi, I have a question about order ${orderNumber}` })}
                 className="rounded-lg bg-gold px-6 py-3 text-sm font-semibold text-navy-deep no-underline"
               >
                 Contact via WhatsApp

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { trackAddToCart, trackRemoveFromCart } from "@/lib/analytics/events";
 
 export interface CartItem {
   slug: string;
@@ -32,6 +33,13 @@ export const useCart = create<CartState>()(
       isOpen: false,
 
       addItem: (item, quantity = 1) => {
+        // Read the pre-mutation state so the event can report the quantity the
+        // stock clamp actually allowed, rather than the quantity requested.
+        const existing = get().items.find((i) => i.slug === item.slug);
+        const finalQuantity = existing
+          ? Math.min(existing.quantity + quantity, item.maxStock)
+          : quantity;
+
         set((state) => {
           const existing = state.items.find((i) => i.slug === item.slug);
           if (existing) {
@@ -45,10 +53,31 @@ export const useCart = create<CartState>()(
           }
           return { items: [...state.items, { ...item, quantity }] };
         });
+
+        // Tracked here rather than in each component so no call site can be
+        // missed — product pages, the drawer and quick-add all funnel through.
+        trackAddToCart({
+          productId: item.slug,
+          productName: item.name,
+          price: item.price,
+          brand: item.brand,
+          quantity: finalQuantity,
+        });
       },
 
       removeItem: (slug) => {
+        const removed = get().items.find((i) => i.slug === slug);
+
         set((state) => ({ items: state.items.filter((i) => i.slug !== slug) }));
+
+        if (removed) {
+          trackRemoveFromCart({
+            productId: removed.slug,
+            productName: removed.name,
+            price: removed.price,
+            quantity: removed.quantity,
+          });
+        }
       },
 
       updateQuantity: (slug, quantity) => {

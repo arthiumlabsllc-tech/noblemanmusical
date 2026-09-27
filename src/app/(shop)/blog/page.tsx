@@ -12,7 +12,7 @@ export default function BlogPage() {
   const posts = getAllPosts();
 
   return (
-    <div className="min-h-screen bg-cream pt-20 lg:pt-24">
+    <div className="min-h-screen bg-cream pt-chrome">
       {/* Hero */}
       <div className="bg-navy-deep py-12 md:py-16">
         <div className="mx-auto max-w-3xl px-4 text-center md:px-6">

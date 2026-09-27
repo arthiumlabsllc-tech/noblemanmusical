@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ShimmerButton } from "@/components/motion/shimmer-button";
+import { PHONE_INPUT_EXAMPLE } from "@/lib/config";
 
 interface B2BQuoteFormProps {
   orgType: string;
@@ -38,7 +39,7 @@ export function B2BQuoteForm({ orgType }: B2BQuoteFormProps) {
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium text-cream/80">Phone</label>
-          <input type="tel" required className="w-full rounded-lg border border-cream/20 bg-navy px-4 py-3 text-sm text-cream placeholder:text-cream/50 focus:border-gold focus:outline-none" placeholder="+233 244 916 034" />
+          <input type="tel" required className="w-full rounded-lg border border-cream/20 bg-navy px-4 py-3 text-sm text-cream placeholder:text-cream/50 focus:border-gold focus:outline-none" placeholder={PHONE_INPUT_EXAMPLE} />
         </div>
       </div>
       <div>

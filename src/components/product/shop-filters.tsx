@@ -2,11 +2,21 @@
 
 import { useState, useMemo } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { categories, getBrands } from "@/lib/data/products";
 import { X, SlidersHorizontal } from "lucide-react";
 
-export function ShopFilters() {
+interface ShopFiltersProps {
+  /**
+   * Set when the page is a department route (/shop/[category]). The route
+   * segment owns the grid, so the category list must navigate to its sibling
+   * route instead of writing ?category= — which the route would override.
+   */
+  categorySlug?: string;
+}
+
+export function ShopFilters({ categorySlug }: ShopFiltersProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -14,7 +24,7 @@ export function ShopFilters() {
 
   const brands = useMemo(() => getBrands(), []);
 
-  const activeCategory = searchParams.get("category") || "";
+  const activeCategory = categorySlug || searchParams.get("category") || "";
   const activeBrand = searchParams.get("brand") || "";
   const activeInStock = searchParams.get("inStock") === "true";
   const minPrice = searchParams.get("minPrice") || "";
@@ -45,22 +55,38 @@ export function ShopFilters() {
           Category
         </h3>
         <ul className="space-y-2">
-          {categories.map((cat) => (
-            <li key={cat.slug}>
-              <button
-                onClick={() => updateFilter("category", activeCategory === cat.slug ? "" : cat.slug)}
-                className={cn(
-                  "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors",
-                  activeCategory === cat.slug
-                    ? "bg-gold/10 font-medium text-gold-dark"
-                    : "text-charcoal/70 hover:bg-cream-dark hover:text-charcoal"
-                )}
-              >
+          {categories.map((cat) => {
+            const isActive = activeCategory === cat.slug;
+            const rowClass = cn(
+              "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors",
+              isActive
+                ? "bg-gold/10 font-medium text-gold-dark"
+                : "text-charcoal/70 hover:bg-cream-dark hover:text-charcoal"
+            );
+            const rowContent = (
+              <>
                 <span>{cat.name}</span>
                 <span className="text-xs text-charcoal/60">{cat.productCount}</span>
-              </button>
-            </li>
-          ))}
+              </>
+            );
+
+            return (
+              <li key={cat.slug}>
+                {categorySlug ? (
+                  <Link href={`/shop/${cat.slug}`} className={rowClass}>
+                    {rowContent}
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => updateFilter("category", isActive ? "" : cat.slug)}
+                    className={rowClass}
+                  >
+                    {rowContent}
+                  </button>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
 

@@ -1,167 +1,122 @@
-import Link from "next/link";
 import Image from "next/image";
-import {
-  MapPin,
-  Phone,
-  Mail,
-  Clock,
-} from "lucide-react";
+import Link from "next/link";
+import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { SITE } from "@/lib/seo/config";
+import { PHONE_TEL_HREF } from "@/lib/config";
+import { footerGroups, legalLinks } from "@/lib/data/footer-nav";
+import { FooterColumn } from "./footer-column";
+import { FooterConnect } from "./footer-connect";
+import { FooterNewsletter } from "./footer-newsletter";
 
-const footerLinks = {
-  shop: [
-    { name: "Guitars", href: "/shop/guitars" },
-    { name: "Keyboards", href: "/shop/keyboards" },
-    { name: "Drums & Percussion", href: "/shop/drums-percussion" },
-    { name: "PA & Sound", href: "/shop/pa-sound" },
-    { name: "Studio Equipment", href: "/shop/studio" },
-    { name: "Traditional Ghanaian", href: "/shop/traditional-ghanaian" },
-    { name: "Accessories", href: "/shop/accessories" },
-  ],
-  company: [
-    { name: "About Us", href: "/about" },
-    { name: "Contact", href: "/contact" },
-    { name: "Blog", href: "/blog" },
-  ],
-  support: [
-    { name: "Order Tracking", href: "/track" },
-    { name: "Shipping Info", href: "/shipping" },
-    { name: "Returns & Warranty", href: "/returns" },
-  ],
-  b2b: [
-    { name: "Churches", href: "/churches" },
-    { name: "Radio Stations", href: "/radio-stations" },
-    { name: "Schools", href: "/schools" },
-    { name: "Bulk Orders", href: "/contact?type=bulk" },
-  ],
-};
+/**
+ * Footer — Phase 23 §5.1 "DENSIFY".
+ *
+ * Five columns: the brand block (logo, tagline, contact, social, payments,
+ * newsletter) plus Shop / Company / Support / For Business. `lg:grid-cols-6`
+ * gives the brand block two tracks and each link group one, which is the only
+ * arrangement where the nine-item Shop column and the three-line contact block
+ * finish at roughly the same height.
+ *
+ * EVERYTHING THAT WAS HERE IS STILL HERE. The pre-item-4 footer had no social
+ * row, no payment row, no newsletter and no Deals/New Arrivals/Warranty links —
+ * but its address, phone, email and opening hours were the site's only printed
+ * contact details, so they are carried over verbatim rather than "simplified".
+ * The phone is now a real `tel:` link built from `@/lib/config` like every other
+ * number on the site, instead of text a shopper can only retype.
+ *
+ * THE LOGO IS NOT `priority`. It was, which made a 43KB below-the-fold image an
+ * eager fetch competing with the homepage hero for bandwidth. Its intrinsic
+ * aspect ratio (714×664) is now expressed as width/height so the browser
+ * reserves the box before the bytes arrive — no reflow when the footer scrolls
+ * into view.
+ */
 
 export function Footer() {
   return (
-    <footer className="bg-navy-deep text-cream/70">
-      {/* Main Footer */}
+    <footer className="pb-chrome bg-navy-deep text-cream/70">
       <div className="mx-auto max-w-7xl px-4 py-16 md:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-6">
-          {/* Brand Column */}
+          {/* Column 1 — brand, contact, social, payments, newsletter */}
           <div className="lg:col-span-2">
-            <Image src="/logos/footer-logo.png" alt="Nobleman Musical Center" width={180} height={0} style={{ height: "auto" }} className="mb-6" priority />
-            <div className="space-y-3 text-sm">
-              <div className="flex items-start gap-3">
-                <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-gold" />
-                <span>Accra, Zongo Lane</span>
-              </div>
+            <Image
+              src="/logos/footer-logo.png"
+              alt="Nobleman Musical Center"
+              width={180}
+              height={168}
+              className="mb-4 h-auto w-[180px]"
+            />
+            <p className="font-accent text-sm italic tracking-widest text-gold-light">
+              {SITE.tagline}
+            </p>
+
+            <div className="mt-6 space-y-3 text-sm">
+              <a
+                href={SITE.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${SITE.name} on Google Maps: ${SITE.address.street}, ${SITE.address.city}`}
+                className="flex items-start gap-3 rounded-sm text-cream/70 transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy-deep"
+              >
+                <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-gold" aria-hidden="true" />
+                <span>{SITE.address.street}, {SITE.address.city}</span>
+              </a>
+              <a
+                href={PHONE_TEL_HREF}
+                aria-label={`Call ${SITE.name} on ${SITE.contact.phone}`}
+                className="flex items-center gap-3 rounded-sm text-cream/70 transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy-deep"
+              >
+                <Phone className="h-4 w-4 flex-shrink-0 text-gold" aria-hidden="true" />
+                <span className="tabular-nums">{SITE.contact.phone}</span>
+              </a>
+              <a
+                href={`mailto:${SITE.contact.email}`}
+                aria-label={`Email ${SITE.name} at ${SITE.contact.email}`}
+                className="flex items-center gap-3 rounded-sm text-cream/70 transition-colors hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy-deep"
+              >
+                <Mail className="h-4 w-4 flex-shrink-0 text-gold" aria-hidden="true" />
+                <span>{SITE.contact.email}</span>
+              </a>
               <div className="flex items-center gap-3">
-                <Phone className="h-4 w-4 flex-shrink-0 text-gold" />
-                <span>+233 244 916 034</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Mail className="h-4 w-4 flex-shrink-0 text-gold" />
-                <span>info@noblemanmusical.com</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Clock className="h-4 w-4 flex-shrink-0 text-gold" />
+                <Clock className="h-4 w-4 flex-shrink-0 text-gold" aria-hidden="true" />
                 <span>Mon–Sat: 9AM – 7PM</span>
               </div>
             </div>
+
+            <FooterConnect />
+            <FooterNewsletter />
           </div>
 
-          {/* Shop Links */}
-          <div>
-            <h3 className="mb-4 font-display text-sm font-bold uppercase tracking-wider text-gold">
-              Shop
-            </h3>
-            <ul className="space-y-2.5">
-              {footerLinks.shop.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm transition-colors hover:text-gold"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company Links */}
-          <div>
-            <h3 className="mb-4 font-display text-sm font-bold uppercase tracking-wider text-gold">
-              Company
-            </h3>
-            <ul className="space-y-2.5">
-              {footerLinks.company.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm transition-colors hover:text-gold"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Support Links */}
-          <div>
-            <h3 className="mb-4 font-display text-sm font-bold uppercase tracking-wider text-gold">
-              Support
-            </h3>
-            <ul className="space-y-2.5">
-              {footerLinks.support.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm transition-colors hover:text-gold"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* B2B Links */}
-          <div>
-            <h3 className="mb-4 font-display text-sm font-bold uppercase tracking-wider text-gold">
-              For Business
-            </h3>
-            <ul className="space-y-2.5">
-              {footerLinks.b2b.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm transition-colors hover:text-gold"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Columns 2-5 */}
+          {footerGroups.map((group) => (
+            <FooterColumn key={group.title} group={group} />
+          ))}
         </div>
       </div>
 
-      {/* Bottom Bar */}
+      {/* Bottom bar */}
       <div className="border-t border-cream/10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-6 md:flex-row md:px-6 lg:px-8">
           <p className="text-xs text-cream/60">
-            &copy; {new Date().getFullYear()} Nobleman Musical Center. All rights reserved.
+            &copy; {new Date().getFullYear()} {SITE.name}. All rights reserved.
           </p>
-          <div className="flex items-center gap-6 text-xs text-cream/60">
-            <Link href="/privacy" className="hover:text-cream/60">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" className="hover:text-cream/60">
-              Terms of Service
-            </Link>
-            <Link href="/cookies" className="hover:text-cream/60">
-              Cookie Policy
-            </Link>
-            <Link href="/accessibility" className="hover:text-cream/60">
-              Accessibility
-            </Link>
-          </div>
+          <nav aria-label="Legal">
+            {/* `min-h-6` on each link is a measured fix, not decoration: these
+                rendered as 15px-tall targets and failed WCAG 2.5.8 (24px minimum
+                target size) once the row wrapped on a 375px screen. */}
+            <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-cream/60">
+              {legalLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    data-todo={link.todo}
+                    className="inline-flex min-h-6 items-center rounded-sm px-1 transition-colors hover:text-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy-deep"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
       </div>
     </footer>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTransition, useState } from "react";
 import { ShimmerButton } from "@/components/motion/shimmer-button";
 import { registerAction } from "@/lib/auth/actions";
+import { PHONE_INPUT_EXAMPLE } from "@/lib/config";
 
 export default function RegisterPage() {
   const [isPending, startTransition] = useTransition();
@@ -65,7 +66,7 @@ export default function RegisterPage() {
                 name="phone"
                 autoComplete="tel"
                 className="w-full rounded-lg border border-cream-dark px-4 py-3 text-sm focus:border-gold focus:outline-none"
-                placeholder="+233 244 916 034"
+                placeholder={PHONE_INPUT_EXAMPLE}
                 disabled={isPending}
               />
             </div>

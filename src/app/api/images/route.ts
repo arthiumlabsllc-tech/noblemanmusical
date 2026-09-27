@@ -24,9 +24,17 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { listImages, deleteMultipleImages } from "@/lib/cloudinary";
+import { getAdminSession } from "@/lib/auth/guard";
 
+// middleware.ts does not authenticate /api/* paths, so both handlers below
+// must check for themselves. DELETE in particular is destructive: unguarded
+// it lets any visitor remove product images by public ID.
 export async function GET(request: NextRequest) {
   try {
+    if (!(await getAdminSession())) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const folder = searchParams.get("folder");
     const maxResults = parseInt(searchParams.get("maxResults") || "50");
@@ -53,6 +61,10 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    if (!(await getAdminSession())) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
     const { publicIds } = body as { publicIds: string[] };
 

@@ -3,6 +3,7 @@ import { resend, EMAIL_FROM } from "./client";
 import { formatGHS } from "@/lib/utils";
 import { OrderConfirmationEmail } from "./templates/OrderConfirmation";
 import { WelcomeEmail } from "./templates/WelcomeEmail";
+import { NewsletterWelcome } from "./templates/NewsletterWelcome";
 import { OrderShippedEmail } from "./templates/OrderShipped";
 import { PasswordResetEmail } from "./templates/PasswordReset";
 import { AbandonedCartEmail } from "./templates/AbandonedCart";
@@ -118,6 +119,34 @@ export async function sendAbandonedCart(input: {
     from: EMAIL_FROM,
     to: input.to,
     subject: "You left something behind at Nobleman!",
+    html,
+  });
+}
+
+/**
+ * Newsletter welcome. Returns the Resend result rather than throwing so the
+ * caller can persist the subscription first and treat a delivery failure as a
+ * separate, logged concern — a subscriber saved but not greeted is still a
+ * subscriber, while a thrown error would have looked like a failed signup.
+ */
+export async function sendNewsletterWelcome(input: {
+  to: string;
+  shopUrl: string;
+  contactUrl: string;
+  mailingLine: string;
+}) {
+  const html = await render(
+    NewsletterWelcome({
+      shopUrl: input.shopUrl,
+      contactUrl: input.contactUrl,
+      mailingLine: input.mailingLine,
+    })
+  );
+
+  return resend.emails.send({
+    from: EMAIL_FROM,
+    to: input.to,
+    subject: "Welcome to the Nobleman Circle",
     html,
   });
 }

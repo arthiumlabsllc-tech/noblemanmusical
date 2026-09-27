@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAllPosts, getPostBySlug } from "@/lib/content/blog";
+import { JsonLd } from "@/components/seo/json-ld";
+import { blogPostingLd, breadcrumbLd } from "@/lib/seo/json-ld";
 import { ArrowLeft, Clock, User, BookOpen } from "lucide-react";
 import { sanitizeHtml } from "@/lib/utils/sanitize";
 
@@ -16,10 +18,32 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const post = getPostBySlug(slug);
-  if (!post) return { title: "Post Not Found" };
+  if (!post) {
+    return { title: "Post Not Found", robots: { index: false, follow: false } };
+  }
+
+  const canonical = `/blog/${post.slug}`;
   return {
-    title: `${post.title} — Nobleman Blog`,
+    // The root template already appends the site name; "— Nobleman Blog" on top
+    // of it pushed long titles past the truncation point.
+    title: post.title,
     description: post.excerpt,
+    keywords: [post.category, "musical instruments Ghana", "music tips Accra"],
+    alternates: { canonical },
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description: post.excerpt,
+      url: canonical,
+      publishedTime: post.date,
+      modifiedTime: post.date,
+      // `authors`, not `author` — this mirrors the metadata root field name and
+      // is emitted as og:article:author.
+      authors: [post.author],
+      section: post.category,
+      tags: [post.category],
+    },
+    twitter: { card: "summary_large_image", title: post.title, description: post.excerpt },
   };
 }
 
@@ -51,7 +75,16 @@ export default async function BlogPostPage({
     .join("\n");
 
   return (
-    <article className="min-h-screen bg-cream pt-20 lg:pt-24">
+    <article className="min-h-screen bg-cream pt-chrome">
+      <JsonLd
+        data={[
+          blogPostingLd(post),
+          breadcrumbLd([
+            { name: "Blog", path: "/blog" },
+            { name: post.title, path: `/blog/${post.slug}` },
+          ]),
+        ]}
+      />
       {/* Hero */}
       <div className="bg-navy-deep py-12 md:py-16">
         <div className="mx-auto max-w-3xl px-4 md:px-6">

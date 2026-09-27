@@ -1,0 +1,7 @@
+drawer open: ok
+== dialog element ==: {"rect":{"x":0,"y":0,"w":375,"h":812},"position":"fixed","zIndex":"45","bgColor":"rgb(6, 15, 36)","opacity":"1","backdropFilter":"none","transform":"none","overflowY":"auto"}
+== dialog ancestor chain ==: [{"tag":"DIV","id":null,"z":"45","pos":"fixed","opacity":"1","transform":null,"filter":null,"contain":"none","isolation":"auto"},{"tag":"BODY","id":null,"z":"auto","pos":"static","opacity":"1","transform":null,"filter":null,"contain":"none","isolation":"auto"}]
+== all fixed full-screen layers, sorted by z ==: [{"tag":"DIV","role":"dialog","aria":"Main navigation","cls":"fixed inset-0 z-[var(--z-drawer)] overflow-y-auto overscroll-contain bg-navy-dee","z":"45","bg":"rgb(6, 15, 36)","bf":"none","rectH":812,"visible":true}]
+== what is painted on top where hero bleeds ==: [{"at":"190,150","tag":"A","aria":null,"text":"Home","z":"auto","bg":"rgba(0, 0, 0, 0)","inDialog":true},{"at":"190,400","tag":"UL","aria":null,"text":"Guitars 8 Keyboards & Pi","z":"auto","bg":"rgba(0, 0, 0, 0)","inDialog":true},{"at":"190,600","tag":"BUTTON","aria":null,"text":"Studio & Recording 4","z":"auto","bg":"rgba(0, 0, 0, 0)","inDialog":true},{"at":"190,700","tag":"DIV","aria":null,"text":"We use cookies to enhanc","z":"60","bg":"oklab(0.173419 -0.00495896 -0.0456461 / 0.95)","inDialog":false}]
+== token check ==: {"zDrawer":"45","zOverlay":"60","zNavbar":"50","chromeH":"calc(36px + 64px + 0px)"}
+shot: 16-drawer-layers.png

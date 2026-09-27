@@ -49,6 +49,10 @@
   --z-overlay: 60;
   --z-modal: 70;
   --z-toast: 80;
+  /* Mobile nav drawer. Sits BELOW --z-navbar on purpose: the drawer covers the
+     viewport, and at z-60 it also swallowed the header's own close button, so
+     an opened menu could not be closed by tapping. */
+  --z-drawer: 45;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -58,6 +62,41 @@
 @layer base {
   * {
     border-color: var(--color-cream-dark);
+  }
+
+  /* ── Fixed chrome geometry — SINGLE SOURCE OF TRUTH ──
+     The storefront header is a fixed stack: utility bar on top of the nav row.
+     Every page clears it with `pt-chrome` instead of a hand-tuned padding, so
+     changing a height here updates the whole site. Navbar.tsx must keep its
+     Tailwind height classes in sync with these values (h-9 / h-16 / md:h-[72px]).
+     env() is folded in because the header also carries `.safe-top`. */
+  :root {
+    --utility-h: 36px;
+    --navbar-h: 64px;
+    --chrome-h: calc(var(--utility-h) + var(--navbar-h) + env(safe-area-inset-top, 0px));
+
+    /* Bottom fixed chrome. The mobile tab bar is `lg:hidden`, so it only needs
+       clearing below 1024px. 66px is MEASURED, not derived: 1px top border +
+       8+8px `py-2` on the row + a 49px tab (44px `min-h` plus its own `py-1.5`
+       around a 37px icon-over-label stack). This token shipped at 60px, guessed
+       from the obvious arithmetic — 44 + 16 + 1 = 61, which still forgets the
+       link's inner padding. Both under-clear, because nothing derives this
+       number from `mobile-tab-bar.tsx`. `verify-item4.mjs` measures the bar,
+       asserts this equals border + row padding + tab height, and hit-tests the
+       legal links at max scroll, so the drift fails a check instead of quietly
+       eating the footer's clearance. See docs/TECH_DEBT.md #14. */
+    --tabbar-h: 66px;
+
+    /* Published on <html> by <CookieConsent /> from the banner's measured
+       height (see cookie-consent.tsx). Declared here so `calc()` in other
+       layers has a real zero to start from rather than an invalid token. */
+    --consent-h: 0px;
+  }
+
+  @media (min-width: 768px) {
+    :root {
+      --navbar-h: 72px;
+    }
   }
 
   html {
@@ -189,6 +228,32 @@
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* ── Page offset for the fixed utility bar + navbar stack ──
+     Lives in the components layer so a page can still override it with a
+     responsive utility (e.g. `lg:pt-32`) without an specificity fight. */
+  .pt-chrome {
+    padding-top: calc(var(--chrome-h) + 1rem);
+  }
+
+  /* ── Bottom counterpart of .pt-chrome ──
+     Two fixed layers can cover the end of a page: the mobile tab bar (hidden at
+     lg) and the cookie banner, whose height is only known at runtime and is
+     therefore read from `--consent-h` rather than guessed. Without this the
+     footer's legal row sits behind the tab bar on a phone — a WCAG 2.4.3
+     concern (the reading order ends at controls you cannot reach) as well as a
+     dead end for Privacy/Terms links. */
+  .pb-chrome {
+    padding-bottom: calc(
+      var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + var(--consent-h)
+    );
+  }
+
+  @media (min-width: 1024px) {
+    .pb-chrome {
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--consent-h));
+    }
   }
 }
 

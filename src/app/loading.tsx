@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-cream pt-20">
+    <div className="flex min-h-screen items-center justify-center bg-cream pt-chrome">
       <div className="flex flex-col items-center gap-4">
         {/* Animated logo mark */}
         <div className="relative h-16 w-16">

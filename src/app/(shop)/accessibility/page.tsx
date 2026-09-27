@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PolicyLayout } from "@/components/content/policy-layout";
+import { SITE } from "@/lib/seo/config";
 
 export const metadata: Metadata = {
   title: "Accessibility Statement — Nobleman Musical Center",
@@ -73,7 +74,7 @@ export default function AccessibilityPage() {
             accessibility@noblemanmusical.com
           </a>
         </li>
-        <li>Phone: +233 244 916 034</li>
+        <li>Phone: {SITE.contact.phone}</li>
       </ul>
       <p>
         We aim to respond to accessibility feedback within 2 business days and to propose

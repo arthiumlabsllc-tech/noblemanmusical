@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useCart } from "@/hooks/use-cart";
 import { formatGHS } from "@/lib/utils";
+import { PHONE_INPUT_EXAMPLE } from "@/lib/config";
+import { trackBeginCheckout } from "@/lib/analytics/events";
+import { stashPurchase } from "@/lib/analytics/purchase-handoff";
 import { ShimmerButton } from "@/components/motion/shimmer-button";
 import { ShoppingBag, CreditCard, Smartphone, ChevronRight, Check, AlertCircle } from "lucide-react";
 import Link from "next/link";
@@ -26,6 +29,20 @@ export default function CheckoutPage() {
   const subtotalAmount = subtotal();
   const deliveryFee = subtotalAmount >= 50000 ? 0 : 5000;
   const total = subtotalAmount + deliveryFee;
+
+  // begin_checkout is a funnel step, so it should fire once per checkout visit,
+  // not on every keystroke that recomputes the total.
+  const checkoutViewTracked = useRef(false);
+
+  useEffect(() => {
+    if (checkoutViewTracked.current || items.length === 0) return;
+    checkoutViewTracked.current = true;
+    trackBeginCheckout({
+      total,
+      itemCount: items.reduce((n, i) => n + i.quantity, 0),
+      paymentMethod,
+    });
+  }, [items, total, paymentMethod]);
 
   if (items.length === 0) {
     return (
@@ -76,6 +93,24 @@ export default function CheckoutPage() {
         setIsProcessing(false);
         return;
       }
+
+      // Hand the amounts to the success page before the cart is destroyed —
+      // clearCart() below wipes the only source of this data.
+      stashPurchase({
+        orderId: result.orderNumber,
+        orderNumber: result.orderNumber,
+        total,
+        subtotal: subtotalAmount,
+        deliveryFee,
+        itemCount: items.reduce((n, i) => n + i.quantity, 0),
+        paymentMethod,
+        items: items.map((item) => ({
+          productId: item.slug,
+          productName: item.name,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+      });
 
       clearCart();
 
@@ -159,7 +194,7 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <label className="mb-1 block text-sm font-medium text-charcoal">Phone Number</label>
-                    <input type="tel" value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} onBlur={() => blur("phone")} className={`w-full rounded-lg border px-4 py-3 text-sm focus:outline-none focus:ring-1 ${contactErrors.phone ? "border-kente-red focus:border-kente-red focus:ring-kente-red/30" : "border-cream-dark focus:border-gold focus:ring-gold/30"}`} placeholder="+233 244 916 034" />
+                    <input type="tel" value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} onBlur={() => blur("phone")} className={`w-full rounded-lg border px-4 py-3 text-sm focus:outline-none focus:ring-1 ${contactErrors.phone ? "border-kente-red focus:border-kente-red focus:ring-kente-red/30" : "border-cream-dark focus:border-gold focus:ring-gold/30"}`} placeholder={PHONE_INPUT_EXAMPLE} />
                     {contactErrors.phone && <p className="mt-1 text-xs text-kente-red">{contactErrors.phone}</p>}
                   </div>
                 </div>

@@ -1,56 +1,78 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
+import { TopUtilityBar } from "@/components/layout/top-utility-bar";
+import {
+  MegaMenuPanel,
+  MegaMenuTrigger,
+  useMegaMenu,
+} from "@/components/layout/mega-menu";
+import { DepartmentsAccordion } from "@/components/layout/departments-accordion";
+import { NavLink } from "@/components/layout/nav-link";
+import { DrawerDealsLink, ShopNavLinks } from "@/components/layout/deals-nav-link";
+import {
+  NavbarSearch,
+  SearchOverlay,
+  useSearchOverlay,
+} from "@/components/layout/navbar-search";
 import { useCart } from "@/hooks/use-cart";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { cn } from "@/lib/utils";
+import type { Department } from "@/lib/data/departments";
+import type { MegaMenuFeature } from "@/lib/data/storefront-nav";
 import {
   Search,
   ShoppingBag,
   User,
   Menu,
   X,
-  ChevronDown,
   Heart,
 } from "lucide-react";
 
-const categories = [
-  { name: "Guitars", slug: "guitars" },
-  { name: "Keyboards", slug: "keyboards" },
-  { name: "Drums & Percussion", slug: "drums-percussion" },
-  { name: "PA & Sound", slug: "pa-sound" },
-  { name: "Studio", slug: "studio" },
-  { name: "Traditional Ghanaian", slug: "traditional-ghanaian" },
-  { name: "Accessories", slug: "accessories" },
-];
+interface NavbarProps {
+  /** Departments with live counts, serialised in by the root layout. */
+  departments: Department[];
+  feature: MegaMenuFeature | null;
+}
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/shop", label: "Shop" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
+
+/* TODO(phase-23-sub-e): /brands is created with the category pages — the route
+   does not exist yet, so this link 404s on purpose. A loud 404 beats a silent
+   dead end, and Sub-Phase E makes it work with no change here: both links
+   already read their active state from the real pathname. */
+const BRANDS_HREF = "/brands";
+/** Mirrored onto the DOM as `data-todo` so the temporary links are greppable. */
+const BRANDS_TODO = "phase-23-sub-e";
+
+// TODO(sub-phase-f): migrate drawer + megamenu to proper Sheet with inert background
+// The drawer below and MegaMenuPanel both fake modal behaviour: `aria-modal="true"`
+// without an `inert`/`aria-hidden` background, so the page behind stays reachable by
+// Tab and screen-reader traversal. Tracked in docs/TECH_DEBT.md #1.
 
 function isActiveLink(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-export function Navbar() {
+export function Navbar({ departments, feature }: NavbarProps) {
   const pathname = usePathname();
   const { totalItems } = useCart();
   const count = totalItems();
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [shopMenuOpen, setShopMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  const search = useSearchOverlay();
   const mobileMenuRef = useFocusTrap(mobileMenuOpen);
+  const mega = useMegaMenu();
 
   // Scroll detection
   useEffect(() => {
@@ -69,25 +91,6 @@ export function Navbar() {
     return () => document.removeEventListener("keydown", onKey);
   }, [mobileMenuOpen]);
 
-  // ⌘K / Ctrl+K shortcut for search
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setSearchOpen((prev) => !prev);
-      }
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, []);
-
-  // Focus search input when overlay opens
-  useEffect(() => {
-    if (searchOpen) {
-      setTimeout(() => searchInputRef.current?.focus(), 100);
-    }
-  }, [searchOpen]);
-
   // Lock body scroll when mobile menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
@@ -99,6 +102,7 @@ export function Navbar() {
   }, [mobileMenuOpen]);
 
   const shopActive = isActiveLink(pathname, "/shop");
+  const brandsActive = isActiveLink(pathname, BRANDS_HREF);
 
   return (
     <>
@@ -109,92 +113,75 @@ export function Navbar() {
           scrolled ? "border-b border-gold/40 shadow-navy" : "border-b border-gold/20"
         )}
       >
-        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:h-[72px] md:px-6 lg:px-8">
+        <TopUtilityBar />
+        <nav
+          aria-label="Main"
+          className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:h-[72px] md:px-6 lg:px-8"
+        >
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
             <Logo variant="horizontal" tone="gold" width={160} useImage />
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden items-center gap-8 lg:flex">
-            {NAV_LINKS.map((link) => {
+          {/* Desktop Navigation.
+              `gap-6` below xl and `gap-8` from xl up: the row's intrinsic width
+              with seven items is 1243px, so at 1024px it clipped by 234px. Tightening
+              the only breakpoint band that has no room is what makes Brands and Deals
+              fit without dropping either. */}
+          <div className="hidden items-center gap-6 lg:flex xl:gap-8">
+            <NavLink href="/" active={isActiveLink(pathname, "/")}>
+              Home
+            </NavLink>
+
+            {/* Departments owns the mega menu; Shop stays a direct link to the
+                full catalogue so both discovery paths exist. */}
+            <MegaMenuTrigger controller={mega} active={shopActive} />
+
+            {/* Deals then Shop, per the spec's "after Departments, before Shop".
+                One component because Shop's underline has to yield while the
+                ?deals=true filter is the shopper's actual state. */}
+            <ShopNavLinks shopActive={shopActive} />
+
+            <NavLink
+              href={BRANDS_HREF}
+              active={brandsActive}
+              dataTodo={BRANDS_TODO}
+            >
+              Brands
+            </NavLink>
+
+            {NAV_LINKS.filter((link) => link.href !== "/").map((link) => {
               const active = isActiveLink(pathname, link.href);
-              if (link.href === "/shop") return null; // handled separately with mega menu
               return (
                 <NavLink key={link.href} href={link.href} active={active}>
                   {link.label}
                 </NavLink>
               );
             })}
-
-            {/* Shop with Mega Menu */}
-            <div className="relative">
-              <button
-                className={cn(
-                  "relative flex items-center gap-1 text-sm font-medium uppercase tracking-wider transition-colors hover:text-gold",
-                  shopActive ? "text-gold" : "text-cream/80"
-                )}
-                onMouseEnter={() => setShopMenuOpen(true)}
-                onMouseLeave={() => setShopMenuOpen(false)}
-              >
-                Shop
-                <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", shopMenuOpen && "rotate-180")} />
-                {shopActive && (
-                  <motion.span
-                    className="absolute -bottom-1 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-gold"
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: 1 }}
-                    transition={{ duration: 0.2 }}
-                  />
-                )}
-              </button>
-
-              <AnimatePresence>
-                {shopMenuOpen && (
-                  <motion.div
-                    className="absolute left-1/2 top-full mt-2 w-[600px] -translate-x-1/2 rounded-xl bg-navy p-6 shadow-navy-lg"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    transition={{ duration: 0.2 }}
-                    onMouseEnter={() => setShopMenuOpen(true)}
-                    onMouseLeave={() => setShopMenuOpen(false)}
-                  >
-                    <div className="grid grid-cols-2 gap-3">
-                      {categories.map((cat) => (
-                        <Link
-                          key={cat.slug}
-                          href={`/shop/${cat.slug}`}
-                          className="rounded-lg px-4 py-3 text-sm text-cream/70 transition-colors hover:bg-gold/10 hover:text-gold"
-                        >
-                          {cat.name}
-                        </Link>
-                      ))}
-                    </div>
-                    <div className="mt-4 border-t border-cream/10 pt-4">
-                      <Link
-                        href="/shop"
-                        className="text-sm font-medium text-gold hover:text-gold-light"
-                      >
-                        View All Products →
-                      </Link>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
           </div>
 
           {/* Desktop Actions */}
           <div className="hidden items-center gap-3 lg:flex">
-            {/* Search icon button */}
+            {/* The inline field needs 240px the nav row only has from xl up: at
+                1024px logo + seven links + the field measure 1243px against 1009px
+                available. So the field is xl-and-up and the icon button carries
+                1024–1279, instead of clipping the links. Deviation from "desktop =
+                lg" is deliberate and measured; see the item-3 report. */}
             <button
-              onClick={() => setSearchOpen(true)}
-              className="rounded-full p-2 text-cream/70 transition-colors hover:bg-cream/10 hover:text-cream"
+              onClick={() => search.open()}
+              className="rounded-full p-2 text-cream/70 transition-colors hover:bg-cream/10 hover:text-cream xl:hidden"
               aria-label="Search products"
             >
               <Search className="h-5 w-5" />
             </button>
+
+            <div className="hidden xl:block">
+              <NavbarSearch
+                overlayOpen={search.searchOpen}
+                queryRef={search.liveQuery}
+                onOpenOverlay={search.open}
+              />
+            </div>
 
             <Link
               href="/account/wishlist"
@@ -230,7 +217,7 @@ export function Navbar() {
           {/* Mobile: search + cart badge + hamburger */}
           <div className="flex items-center gap-1 lg:hidden">
             <button
-              onClick={() => setSearchOpen(true)}
+              onClick={() => search.open()}
               className="rounded-full p-2 text-cream/80 transition-colors hover:bg-cream/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
               aria-label="Search products"
             >
@@ -259,63 +246,37 @@ export function Navbar() {
             </button>
           </div>
         </nav>
+
+        {/* Rendered inside <header> so `inset-x-0 top-full` can span the full
+            viewport width and sit flush under the nav row. */}
+        <MegaMenuPanel controller={mega} departments={departments} feature={feature} />
       </header>
 
-      {/* Search Overlay */}
-      <AnimatePresence>
-        {searchOpen && (
-          <motion.div
-            className="fixed inset-0 z-[60] bg-navy-deep/80 backdrop-blur-sm"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={() => setSearchOpen(false)}
-          >
-            <motion.div
-              className="mx-auto mt-24 max-w-xl px-4"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.2, delay: 0.05 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-charcoal/60" />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  placeholder="Search instruments..."
-                  className="w-full rounded-xl border border-cream-dark bg-white py-4 pl-12 pr-16 text-base text-charcoal placeholder:text-charcoal/60 focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/30"
-                  onKeyDown={(e) => {
-                    if (e.key === "Escape") setSearchOpen(false);
-                    if (e.key === "Enter" && e.currentTarget.value.trim()) {
-                      window.location.href = `/search?q=${encodeURIComponent(e.currentTarget.value.trim())}`;
-                    }
-                  }}
-                />
-                <button
-                  onClick={() => setSearchOpen(false)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-charcoal/60 hover:text-charcoal"
-                  aria-label="Close search"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-              <p className="mt-3 text-center text-xs text-cream/60">
-                Press <kbd className="rounded border border-cream/20 px-1.5 py-0.5 text-[10px]">ESC</kbd> to close
-              </p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <SearchOverlay
+        open={search.searchOpen}
+        prefill={search.prefill}
+        onClose={search.close}
+        onQueryChange={search.noteQuery}
+      />
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu Overlay
+          z-[var(--z-drawer)] (45) deliberately sits BELOW the header's z-50: at
+          the old z-[60] the overlay swallowed the header, so the only close
+          control on screen was unpaintable and unclickable — an opened menu
+          could not be closed by tapping. Written as an arbitrary var() because
+          Tailwind v4 has no `--z-*` theme namespace, so a bare `z-drawer` class
+          would generate no CSS at all and silently fall back to `z-index: auto`.
+          Body scroll is already locked, so touch-action:none is not needed here
+          and only prevented the menu itself from scrolling. */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
             ref={mobileMenuRef}
-            className="fixed inset-0 z-[60] bg-navy-deep/98 pt-20"
+            /* Fully opaque, not /98: measured in a real 375px browser the sheet is
+               the topmost full-viewport layer with no backdrop-filter, so the 2%
+               alpha bought nothing and just let the hero's large type ghost through
+               the flat navy panel. */
+            className="fixed inset-0 z-[var(--z-drawer)] overflow-y-auto overscroll-contain bg-navy-deep pt-chrome"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -323,9 +284,14 @@ export function Navbar() {
             role="dialog"
             aria-modal="true"
             aria-label="Main navigation"
-            style={{ touchAction: "none" }}
           >
-            <nav className="flex flex-col gap-1 px-6">
+            {/* pb clears both fixed bottom layers, which now sit ON TOP of this
+                drawer: the tab bar (z-50, ~6rem of padding) and the cookie banner
+                (z-[80], height published as `--consent-h` because it is 122px on a
+                phone and one row on wider screens — it cannot be a magic number).
+                Without the consent term, Deals / Brands / the icon row are
+                unreachable behind the banner on a first visit. */}
+            <nav className="flex flex-col gap-1 px-6 pb-[calc(6rem+var(--consent-h,0px))]">
               {NAV_LINKS.map((link) => {
                 const active = isActiveLink(pathname, link.href);
                 return (
@@ -345,35 +311,28 @@ export function Navbar() {
 
               <div className="px-4 py-2">
                 <span className="text-xs font-semibold uppercase tracking-widest text-gold/60">
-                  Shop by Category
+                  Shop by Department
                 </span>
               </div>
 
-              {categories.map((cat) => (
-                <Link
-                  key={cat.slug}
-                  href={`/shop/${cat.slug}`}
-                  className="rounded-lg px-6 py-3 text-cream/70 transition-colors hover:bg-cream/5 hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy-deep"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {cat.name}
-                </Link>
-              ))}
+              <DepartmentsAccordion
+                departments={departments}
+                pathname={pathname}
+                onNavigate={() => setMobileMenuOpen(false)}
+              />
 
+              {/* Deals and Brands only — About and Contact were duplicated here,
+                  they already come from the NAV_LINKS loop above. */}
               <div className="mt-4 border-t border-cream/10 pt-4">
+                <DrawerDealsLink onNavigate={() => setMobileMenuOpen(false)} />
                 <Link
-                  href="/about"
+                  href={BRANDS_HREF}
+                  data-todo={BRANDS_TODO}
+                  aria-current={brandsActive ? "page" : undefined}
                   className="block rounded-lg px-4 py-4 text-lg text-cream/80 transition-colors hover:text-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy-deep"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  About
-                </Link>
-                <Link
-                  href="/contact"
-                  className="block rounded-lg px-4 py-4 text-lg text-cream/80 transition-colors hover:text-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-navy-deep"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Contact
+                  Brands A–Z
                 </Link>
               </div>
 
@@ -396,28 +355,5 @@ export function Navbar() {
         )}
       </AnimatePresence>
     </>
-  );
-}
-
-/* ── Nav Link with active indicator ── */
-function NavLink({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "relative text-sm font-medium uppercase tracking-wider transition-colors hover:text-gold",
-        active ? "text-gold" : "text-cream/80"
-      )}
-    >
-      {children}
-      {active && (
-        <motion.span
-          className="absolute -bottom-1 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-gold"
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: 0.2 }}
-        />
-      )}
-    </Link>
   );
 }

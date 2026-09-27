@@ -2,6 +2,8 @@
    WhatsApp Business Cloud API Client
    ═══════════════════════════════════════════════════════════ */
 
+import { buildWhatsAppUrl } from "@/lib/whatsapp/build-url";
+
 const WHATSAPP_API_URL = "https://graph.facebook.com/v18.0";
 
 interface SendMessageInput {
@@ -81,15 +83,14 @@ export function whatsappOrderLink(params: {
   productUrl: string;
   price: string;
 }): string {
-  const number = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "233244916034";
-  const message = `Hi Nobleman, I'd like to order: ${params.productName} (${params.productUrl}) — ${params.price}`;
-  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+  return buildWhatsAppUrl({
+    message: `Hi Nobleman, I'd like to order: ${params.productName} (${params.productUrl}) — ${params.price}`,
+  });
 }
 
 /**
  * Generate a generic wa.me link with a custom message.
  */
 export function whatsappLink(message: string): string {
-  const number = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "233244916034";
-  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+  return buildWhatsAppUrl({ message });
 }

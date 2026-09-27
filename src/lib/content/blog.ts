@@ -59,7 +59,8 @@ Always try before you buy. Visit Nobleman Musical Center in Accra to test guitar
     author: "Kwame Asante",
     date: "2025-09-15",
     category: "Guides",
-    image: "/images/blog/guitar-guide.jpg",
+    image:
+      "https://images.unsplash.com/photo-1550985543?q=80&w=1200&auto=format&fit=crop",
     readTime: "5 min read",
   },
   {
@@ -120,7 +121,8 @@ Nobleman Musical Center offers church sound system consultation and installation
     author: "Nana Ama Osei",
     date: "2025-09-01",
     category: "Pro Audio",
-    image: "/images/blog/church-sound.jpg",
+    image:
+      "https://images.unsplash.com/photo-1470229722913?q=80&w=1200&auto=format&fit=crop",
     readTime: "7 min read",
   },
   {
@@ -196,7 +198,8 @@ Bring your instruments to Nobleman Musical Center for professional servicing. Ou
     author: "Kofi Mensah",
     date: "2025-08-20",
     category: "Maintenance",
-    image: "/images/blog/instrument-care.jpg",
+    image:
+      "https://images.unsplash.com/photo-1520523839897?q=80&w=1200&auto=format&fit=crop",
     readTime: "6 min read",
   },
 ];

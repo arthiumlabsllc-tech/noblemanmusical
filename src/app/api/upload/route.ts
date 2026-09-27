@@ -14,9 +14,17 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { uploadFromFile, CLOUDINARY_FOLDERS } from "@/lib/cloudinary";
+import { getAdminSession } from "@/lib/auth/guard";
 
 export async function POST(request: NextRequest) {
   try {
+    // middleware.ts passes every /api/* path through without a session check,
+    // so this handler must authorize itself — otherwise any visitor can write
+    // to the Cloudinary account and consume its storage/bandwidth quota.
+    if (!(await getAdminSession())) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const formData = await request.formData();
     const files = formData.getAll("files") as File[];
     const folder = (formData.get("folder") as string) || CLOUDINARY_FOLDERS.PRODUCTS;

@@ -13,7 +13,7 @@ const ITEMS_PER_PAGE = 12;
 
 export default function ShopPage() {
   return (
-    <div className="min-h-screen bg-cream pt-20 lg:pt-24">
+    <div className="min-h-screen bg-cream pt-chrome">
       {/* Header */}
       <div className="bg-navy-deep py-12 md:py-16">
         <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8">

@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { formatGHS, whatsappUrl } from "@/lib/utils";
+import { formatGHS } from "@/lib/utils";
+import { buildWhatsAppUrl } from "@/lib/whatsapp/build-url";
+import { PHONE_DISPLAY, PHONE_TEL_HREF } from "@/lib/config";
+import { trackProductView } from "@/lib/analytics/events";
 import { ShimmerButton } from "@/components/motion/shimmer-button";
 import { RevealOnScroll } from "@/components/motion/reveal-on-scroll";
 import { useCart } from "@/hooks/use-cart";
@@ -29,6 +32,17 @@ export function ProductDetail({ product }: ProductDetailProps) {
   const [activeTab, setActiveTab] = useState("Description");
   const [quantity, setQuantity] = useState(1);
   const { addItem, openCart } = useCart();
+
+  // GA4 view_item — the top of the product funnel, and the event that makes
+  // product-level conversion rates readable in the Ecommerce reports.
+  useEffect(() => {
+    trackProductView({
+      productId: product.slug,
+      productName: product.name,
+      price: product.price,
+      category: product.categoryName,
+    });
+  }, [product.slug, product.name, product.price, product.categoryName]);
 
   const handleAddToCart = () => {
     addItem({
@@ -197,7 +211,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
               </ShimmerButton>
               <ShimmerButton variant="outline" size="lg" className="flex-1" asChild>
                 <a
-                  href={whatsappUrl(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "233244916034", whatsappMessage)}
+                  href={buildWhatsAppUrl({ message: whatsappMessage })}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2"
@@ -284,7 +298,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                 <li>Physical damage, misuse, or normal wear not covered</li>
                 <li>Keep your receipt as proof of purchase</li>
               </ul>
-              <p>Contact us for warranty claims: <a href="tel:+233244916034" className="text-gold hover:underline">+233 244 916 034</a></p>
+              <p>Contact us for warranty claims: <a href={PHONE_TEL_HREF} className="text-gold hover:underline">{PHONE_DISPLAY}</a></p>
             </div>
           )}
         </div>

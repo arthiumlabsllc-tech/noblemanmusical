@@ -4,13 +4,16 @@ import { RevealOnScroll } from "@/components/motion/reveal-on-scroll";
 import { GoldDivider } from "@/components/brand/gold-divider";
 import { ShimmerButton } from "@/components/motion/shimmer-button";
 import { MapPin, Phone, Mail, Clock, MessageCircle } from "lucide-react";
+import { SITE } from "@/lib/seo/config";
+import { PHONE_INPUT_EXAMPLE } from "@/lib/config";
+import { buildWhatsAppUrl } from "@/lib/whatsapp/build-url";
 import { useState } from "react";
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
 
   return (
-    <div className="min-h-screen bg-cream pt-20 lg:pt-24">
+    <div className="min-h-screen bg-cream pt-chrome">
       <div className="bg-navy-deep py-16 md:py-24">
         <div className="mx-auto max-w-4xl px-4 text-center md:px-6">
           <RevealOnScroll>
@@ -32,7 +35,7 @@ export default function ContactPage() {
                 <div className="space-y-4">
                   {[
                     { icon: MapPin, label: "Address", value: "Accra, Zongo Lane" },
-                    { icon: Phone, label: "Phone", value: "+233 244 916 034" },
+                    { icon: Phone, label: "Phone", value: SITE.contact.phone },
                     { icon: Mail, label: "Email", value: "info@noblemanmusical.com" },
                     { icon: Clock, label: "Hours", value: "Mon–Sat: 9AM – 7PM" },
                   ].map((item) => (
@@ -46,7 +49,7 @@ export default function ContactPage() {
                   ))}
                 </div>
                 <a
-                  href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "233244916034"}?text=${encodeURIComponent("Hello Nobleman Musical Center, I'd like to inquire about your instruments.")}`}
+                  href={buildWhatsAppUrl({ message: "Hello Nobleman Musical Center, I'd like to inquire about your instruments." })}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 rounded-lg bg-kente-green px-6 py-3 font-semibold text-cream hover:bg-kente-green/90"
@@ -79,7 +82,7 @@ export default function ContactPage() {
                       </div>
                       <div>
                         <label className="mb-1 block text-sm font-medium text-charcoal">Phone</label>
-                        <input type="tel" className="w-full rounded-lg border border-cream-dark px-4 py-3 text-sm focus:border-gold focus:outline-none" placeholder="+233 244 916 034" />
+                        <input type="tel" className="w-full rounded-lg border border-cream-dark px-4 py-3 text-sm focus:border-gold focus:outline-none" placeholder={PHONE_INPUT_EXAMPLE} />
                       </div>
                     </div>
                     <div>

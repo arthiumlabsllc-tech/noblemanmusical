@@ -1,0 +1,85 @@
+# Phase 23 Sub-Phase A - item 3 verification transcript
+
+Captured 2026-09-27 against `next start` on port 3010 (production build).
+`node scripts/verify-item3.mjs` drives headless Chrome over CDP with no
+dependencies; the harness is temporary and deleted after the report, so this
+transcript and the PNGs beside it are the durable evidence.
+
+ANSI escapes and the console's box-drawing glyphs were stripped on the way in
+rather than re-encoded, so tree branches are absent from the build excerpt.
+
+## Build
+
+```
+Compiled successfully in 19.3s
+Linting and checking validity of types ...
+Collecting page data ...
+Generating static pages (0/85) ...
+Generating static pages (21/85)
+Generating static pages (42/85)
+Generating static pages (63/85)
+Generating static pages (85/85)
+Finalizing page optimization ...
+Route (app)                                         Size  First Load JS
+Middleware                                      192 kB
+```
+
+Exit code 0. Two lines reach stderr on every build in this workspace and are
+unrelated to item 3: `Using edge runtime on a page currently disables static
+generation for that page`, and `RESEND_API_KEY is not set - emails will not be
+sent.` (no email key in the local .env).
+
+## CDP verification - 1440 / 1024 / 768 / 375
+
+```
+launching chrome...
+PASS  1440 nav does not overflow  :: scrollW=1280 clientW=1280
+PASS  1440 nav order is Home,Deals,Shop,Brands,About,Contact  :: Home,Deals,Shop,Brands,About,Contact
+PASS  Deals href is real filter  :: /shop?deals=true
+PASS  Deals is gold  :: rgb(212, 175, 55)
+PASS  Brands href  :: /brands
+PASS  Brands data-todo  :: phase-23-sub-e
+PASS  inline search present at 1440
+PASS  inline search 240px at rest  :: {"w":240,"h":38}
+PASS  inline search expands to 320px on focus  :: {"w":320,"active":true}
+PASS  typing opens overlay  :: {"open":true,"value":"guit","z":"60","focusInOverlay":true,"inlineValue":"g"}
+PASS  the full query reaches the overlay  :: {"open":true,"value":"guit","z":"60","focusInOverlay":true,"inlineValue":"g"}
+PASS  Escape closes overlay  :: true
+PASS  inline search collapses back to 240px  :: {"w":240,"v":"guit"}
+PASS  inline field adopts the overlay's final query  :: {"w":240,"v":"guit"}
+PASS  Ctrl+K opens overlay  :: true
+PASS  Deals aria-current on ?deals=true  :: {"current":"page","lineW":24,"color":"rgb(212, 175, 55)"}
+PASS  Deals underline held open  :: lineW=24
+PASS  Shop underline yields to Deals  :: Shop lineW=0
+PASS  Shop is not aria-current while Deals is  :: null
+PASS  found 'On sale only' chip  :: {"x":449.8203125,"y":500}
+PASS  clearing the chip drops Deals active state  :: {"url":"","current":null,"lineW":0,"shop":"page"}
+PASS  Shop becomes active again once deals is cleared  :: {"lineW":24,"current":"page"}
+PASS  1024 nav does not overflow  :: {"scrollW":1009,"clientW":1009,"rowW":619,"overflowX":false}
+PASS  1024 no horizontal page scrollbar  :: false
+PASS  1024 falls back to icon-only search  :: {"inlineVisible":false,"icons":1,"labels":"Home,Deals,Shop,Brands,About,Contact","departments":true}
+PASS  1024 keeps a visible search button  :: 1
+PASS  1024 keeps every nav item (Departments is a button, not a link)  :: Home,Deals,Shop,Brands,About,Contact departmentsTrigger=true
+PASS  768 hides inline search  :: {"inlineVisible":false,"iconButtons":2,"scrollW":753,"clientW":753}
+PASS  768 keeps icon-only search  :: 2
+PASS  768 nav does not overflow  :: 753/753
+PASS  cookie banner renders on first visit  :: {"z":"80","rect":{"y":690,"h":122},"topmostIsBanner":true,"topmostTag":"DIV.mx-auto flex max-w-5xl flex-co"}
+PASS  cookie banner is z-[80]  :: 80
+PASS  cookie banner is topmost before drawer opens  :: {"z":"80","rect":{"y":690,"h":122},"topmostIsBanner":true,"topmostTag":"DIV.mx-auto flex max-w-5xl flex-co"}
+PASS  drawer opened  :: {"bannerZ":"80","drawerZ":"45","consentH":"122px","bannerTopmost":true,"occluded":[],"count":16,"probe":[{"label":"Searc
+PASS  banner still visible above open drawer  :: bannerZ=80 drawerZ=45 topmost=true
+PASS  every drawer control is reachable (scrolled into view)  :: n=16 consentH=122px occluded=[] tail=[{"label":"Search","hit":true,"cy":574,"bannerTop":690,"under":null},{"label":"Wishlist","hit":true,"cy":574,"bannerTop":690,"under":null},{"label":"Cart","hit":true,"cy":574,"bannerTop":690,"under":null},{"label":"Account","hit":true,"cy":574,"bannerTop":690,"under":null}]
+PASS  drawer Deals gold + real href  :: {"href":"/shop?deals=true","color":"rgb(212, 175, 55)"}
+PASS  drawer Brands carries data-todo  :: {"href":"/brands","todo":"phase-23-sub-e"}
+PASS  375 no horizontal overflow  :: {"overflow":false,"sw":375,"cw":375}
+PASS  /brands returns HTTP 404 by design  :: status=404
+  /brands title: Nobleman Musical Center  Premium Musical Instruments in Gha
+=== console errors/warnings ===
+  (0 relevant of 0 total)
+=== page exceptions ===
+  (0)
+PASS  no unexplained console errors  :: 0 messages
+PASS  no page exceptions  :: 0 exceptions
+=== SUMMARY ===
+42/42 passed
+```

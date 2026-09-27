@@ -6,6 +6,7 @@ import { Pause, Play } from "lucide-react";
 import Link from "next/link";
 import { ShimmerButton } from "@/components/motion/shimmer-button";
 import { MessageCircle, ShoppingBag } from "lucide-react";
+import { buildWhatsAppUrl } from "@/lib/whatsapp/build-url";
 import { heroSlides } from "@/lib/data/hero-slides";
 
 const SLIDE_DURATION = 7000; // 7 seconds per slide
@@ -170,7 +171,7 @@ export function Hero() {
       </div>
 
       {/* ── Fixed Content Layer ── */}
-      <div className="relative z-10 flex min-h-[90svh] md:min-h-[85vh] flex-col items-center justify-center px-6 pt-20 md:pt-24">
+      <div className="relative z-10 flex min-h-[90svh] md:min-h-[85vh] flex-col items-center justify-center px-6 pt-chrome">
         <div className="mx-auto max-w-5xl text-center">
           {/* Main headline */}
           <motion.h1
@@ -220,7 +221,7 @@ export function Hero() {
 
             <ShimmerButton variant="outline" size="lg" className="min-w-[220px]" asChild>
               <a
-                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "233244916034"}?text=${encodeURIComponent("Hello Nobleman Musical Center, I'd like to inquire about your instruments.")}`}
+                href={buildWhatsAppUrl({ message: "Hello Nobleman Musical Center, I'd like to inquire about your instruments." })}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2"

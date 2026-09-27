@@ -41,6 +41,29 @@ Step-by-step instructions for obtaining every API key and credential needed to r
 - Create two Neon projects: one for dev, one for production
 - Use different `DATABASE_URL` values in `.env.local` vs Vercel production env
 
+**Last step, and the one that gets missed:** a connection string alone creates no
+schema. `DATABASE_URL` pointing at an empty database still boots, still serves
+every storefront page (those read the static seed data under `src/lib/data/`) and
+still passes a production build — the tables are only noticed when something
+writes.
+
+```bash
+npm run db:push   # creates schema from src/lib/db/schema.ts
+npm run db:seed   # optional: demo catalogue
+```
+
+Check what state you are actually in before assuming (the `public` schema of the
+database in `.env` was measured at **0 tables** during Phase 23 item 4, which is
+why newsletter signups fail there — `docs/TECH_DEBT.md` #12):
+
+```sql
+select count(*) from pg_tables where schemaname = 'public';
+select to_regclass('public.subscribers');  -- NULL means the table does not exist
+```
+
+`db:push` mutates whatever `DATABASE_URL` points at. If that is the production
+project, that is a deploy decision, not a dev step.
+
 ---
 
 ## 2. Auth.js (Authentication)
@@ -166,6 +189,19 @@ Step-by-step instructions for obtaining every API key and credential needed to r
 **Sandbox vs Production:**
 - Resend free tier: 3,000 emails/month, 100/day
 - For production, verify your domain to remove sandbox restrictions
+
+**If the key is absent or blank** (`RESEND_API_KEY=` with nothing after it counts
+as absent): the app does not crash and the build does not fail. `next start` logs
+one warning line at boot — `RESEND_API_KEY is not set — emails will not be sent.`
+— and after that every send is skipped and returns an error object. Order
+confirmations, password resets, quote acknowledgements, low-stock alerts and the
+newsletter welcome all become no-ops, while the storefront keeps looking healthy.
+
+That is deliberate — Resend is meant to stay optional so a missing key cannot fail
+`next build` (see the comment in `src/lib/email/client.ts`) — but it means **"the
+site works" is not evidence that email works.** Confirm delivery by submitting the
+newsletter form and watching the server log for either a delivery or
+`[newsletter] subscriber saved but welcome email was not delivered`.
 
 ---
 

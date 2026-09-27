@@ -11,6 +11,7 @@ import {
   Tailwind,
   Link,
 } from "@react-email/components";
+import { buildWhatsAppUrl } from "@/lib/whatsapp/build-url";
 
 interface OrderShippedEmailProps {
   orderNumber: string;
@@ -73,7 +74,7 @@ export function OrderShippedEmail({
 
             <Section className="my-6 text-center">
               <Link
-                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "233244916034"}?text=${encodeURIComponent(`Hi, I'm expecting delivery of order ${orderNumber}`)}`}
+                href={buildWhatsAppUrl({ message: `Hi, I'm expecting delivery of order ${orderNumber}` })}
                 className="rounded-lg bg-gold px-6 py-3 text-sm font-semibold text-navy-deep no-underline"
               >
                 Track via WhatsApp
