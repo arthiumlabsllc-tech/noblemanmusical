@@ -1,0 +1,362 @@
+@import "tailwindcss";
+
+/* ============================================================================
+   NOBLEMAN MUSICAL CENTER v2 — Furnixar-inspired Design System
+   Flat, geometric, editorial. Zero shadows, zero radii. One gold accent.
+   ============================================================================ */
+
+@theme {
+  /* ── Brand palette (Furnixar) ─────────────────────────────── */
+  --color-navy: #172430;        /* title / dark bands / solid buttons */
+  --color-navy-deep: #0f1a24;   /* deeper band */
+  --color-gold: #bb976d;        /* the single warm accent */
+  --color-gold-light: #c9ab84;  /* gold hover */
+  --color-bronze: #bb976d;      /* brand eyebrow text */
+  --color-taupe: #dbcbbd;       /* soft pill fill */
+  --color-cream: #f6f6f6;       /* snow — light surfaces */
+  --color-snow: #f6f6f6;        /* footer / panel bg */
+  --color-mist: #f5f5f5;        /* section band bg */
+  --color-body: #3c474e;        /* paragraph text */
+  --color-muted: #5b646d;       /* secondary meta text */
+  --color-line: #e8e9ea;        /* hairline borders */
+  --color-charcoal: #3c474e;    /* legacy alias → body */
+  --color-kente-red: #e13939;   /* badges / sale only */
+  --color-kente-green: #0a7b3e;
+
+  /* ── Typography ───────────────────────────────────────────── */
+  --font-sans: var(--font-josefin), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-josefin), ui-sans-serif, system-ui, sans-serif;
+  --font-script: var(--font-yellowtail), cursive;
+
+  /* ── Container widths ─────────────────────────────────────── */
+  /* NOTE: intentionally NOT named using the Tailwind v4 container namespace,
+     because that namespace powers the width utilities and would redefine
+     the full-width class to a fixed pixel width, breaking layout. */
+  --shell-narrow: 720px;
+  --shell-content: 1280px;
+  --shell-wide: 1600px;
+  --shell-full: 1920px;
+
+  /* ── Gutters ──────────────────────────────────────────────── */
+  --gutter: 16px;
+  --chrome-h: 0px;
+}
+
+@media (min-width: 640px) {
+  :root { --gutter: 20px; }
+}
+@media (min-width: 1024px) {
+  :root { --gutter: 30px; }
+}
+@media (min-width: 1536px) {
+  :root { --gutter: 50px; }
+}
+
+/* Header center column — responsive flex (Tailwind v4 missing base .flex utility) */
+.header-center-col { display: none; }
+@media (min-width: 48rem) {
+  .header-center-col { display: flex; }
+}
+
+/* ============================================================================
+   Container Classes
+   ============================================================================ */
+
+.container-narrow {
+  width: 100%;
+  max-width: var(--shell-narrow);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.container-content {
+  width: 100%;
+  max-width: var(--shell-content);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.container-wide {
+  width: 100%;
+  max-width: var(--shell-wide);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.container-full {
+  width: 100%;
+  max-width: var(--shell-full);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* ============================================================================
+   Base Styles
+   ============================================================================ */
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #ffffff;
+  color: var(--color-body);
+  overflow-x: hidden;
+}
+
+/* Furnixar uses square corners everywhere */
+* {
+  border-radius: 0;
+}
+/* Keep circular only where intended */
+.rounded-full, .rounded-full * {
+  border-radius: 9999px;
+}
+
+/* Focus visible — gold */
+*:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================================
+   Signature Button System — sliding fill + duplicated label (data-text)
+   Markup: <a class="btn btn-outline" data-text="Label"><span>Label</span></a>
+   ============================================================================ */
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid var(--color-navy);
+  background: transparent;
+  color: var(--color-navy);
+  padding: 16px 26px;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  isolation: isolate;
+  transition: color 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+}
+/* Sliding fill layer — hidden by default (off to the left), no text of its
+   own; the <span> is the single label so nothing can double up on hover. */
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-navy);
+  transform: translateX(-101%);
+  transition: transform 0.45s cubic-bezier(0.75, 0, 0.125, 1);
+}
+.btn > span {
+  position: relative;
+  z-index: 1;
+  transition: color 0.3s ease;
+}
+.btn:hover::before { transform: translateX(0); }
+
+/* Outline: navy border + navy text → wipes navy, text turns white */
+.btn-outline { border-color: var(--color-navy); color: var(--color-navy); }
+.btn-outline:hover > span { color: #fff; }
+
+/* Solid: navy filled + white text → wipes white, text turns navy */
+.btn-solid { background: var(--color-navy); border-color: var(--color-navy); color: #fff; }
+.btn-solid::before { background: #fff; }
+.btn-solid:hover { color: var(--color-navy); }
+.btn-solid:hover > span { color: var(--color-navy); }
+
+/* Gold outline: gold border + gold text → wipes gold, text white */
+.btn-gold-outline { border-color: var(--color-gold); color: var(--color-gold); }
+.btn-gold-outline::before { background: var(--color-gold); }
+.btn-gold-outline:hover > span { color: #fff; }
+
+/* Gold solid: gold filled + white text → wipes navy, text stays white */
+.btn-gold-solid { background: var(--color-gold); border-color: var(--color-gold); color: #fff; }
+.btn-gold-solid::before { background: var(--color-navy); }
+.btn-gold-solid:hover > span { color: #fff; }
+
+/* On-dark outline (white border/text → wipes white, text goes navy) */
+.btn-light-outline { border-color: rgba(255, 255, 255, 0.4); color: #fff; }
+.btn-light-outline::before { background: #fff; }
+.btn-light-outline:hover > span { color: var(--color-navy); }
+
+/* Sizes */
+.btn-sm { padding: 13px 22px; font-size: 0.95rem; }
+.btn-xs { padding: 9px 16px; font-size: 0.85rem; }
+
+/* ============================================================================
+   Animated Underline Links — background-gradient sweep (group-triggerable)
+   ============================================================================ */
+
+.text-underline,
+.text-underline-gold,
+.text-underline-navy {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1.5px;
+  transition: background-size 0.3s ease;
+  padding-bottom: 2px;
+}
+.text-underline:hover,
+.text-underline-gold:hover,
+.text-underline-navy:hover,
+.group:hover .text-underline,
+.group:hover .text-underline-gold,
+.group:hover .text-underline-navy {
+  background-size: 100% 1.5px;
+}
+/* Gold underline sweep, but keep the element's own text color (navy) */
+.text-underline-gold {
+  background-image: linear-gradient(var(--color-gold), var(--color-gold));
+}
+
+/* ============================================================================
+   Section Title — brush script overlapping tracked-out caps
+   ============================================================================ */
+
+.section-script {
+  font-family: var(--font-script);
+  color: var(--color-gold);
+  font-weight: 400;
+  line-height: 0.8;
+  display: block;
+}
+.section-caps {
+  text-transform: uppercase;
+  font-weight: 400;
+  letter-spacing: 0.5em;
+  color: var(--color-navy);
+  line-height: 1;
+}
+
+/* ============================================================================
+   Product Card — hover action circles + overlapping info panel
+   ============================================================================ */
+
+.card-action {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--color-line);
+  color: var(--color-navy);
+  border-radius: 9999px;
+  transition: all 0.3s ease;
+}
+.card-action:hover {
+  background: var(--color-gold);
+  border-color: var(--color-gold);
+  color: #fff;
+}
+
+/* Line-art category icon box */
+.cat-icon-box {
+  width: 70px;
+  height: 70px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-gold);
+  border-radius: 10px;
+  color: var(--color-gold);
+  transition: all 0.4s ease;
+}
+.group:hover .cat-icon-box {
+  background: var(--color-gold);
+  color: #fff;
+}
+
+/* ============================================================================
+   Product Card — overlapping info panel that swaps to action circles on hover
+   ============================================================================ */
+
+.pcard {
+  position: relative;
+  overflow: hidden;
+  display: block;
+}
+.pcard-media {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: var(--color-cream);
+}
+.pcard-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+.pcard:hover .pcard-img {
+  transform: scale(1.1);
+}
+.pcard-info {
+  position: absolute;
+  left: 4%;
+  bottom: 12px;
+  width: 92%;
+  z-index: 20;
+  background: #ffffff;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.45s ease;
+}
+.pcard:hover .pcard-info {
+  transform: translateY(-50%);
+  opacity: 0;
+  visibility: hidden;
+}
+.pcard-actions {
+  position: absolute;
+  left: 0;
+  bottom: 22px;
+  width: 100%;
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  transform: translateY(20px);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.45s ease;
+}
+.pcard:hover .pcard-actions {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+}
+/* Badges */
+.pcard-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 30;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  color: #fff;
+}
+
