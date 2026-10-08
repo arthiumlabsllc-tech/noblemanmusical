@@ -3,6 +3,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { StoreSwitcher } from "@/components/admin/store-switcher";
 
 export const metadata: Metadata = {
   title: {
@@ -29,27 +30,26 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen bg-mist">
       <AdminSidebar currentPath="/admin" />
       <main className="ml-64 min-h-screen">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-charcoal/10 bg-white px-8 py-4">
-          <div>
-            <h1 className="text-lg font-semibold text-navy">Admin Panel</h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/" className="text-sm text-charcoal/60 hover:text-gold">
+        <header className="sticky top-0 z-30 flex flex-wrap items-center justify-between gap-4 border-b border-line bg-white px-8 py-4">
+          <h1 className="text-lg font-semibold tracking-tight text-navy">Admin Panel</h1>
+          <div className="flex flex-wrap items-center gap-4">
+            <StoreSwitcher />
+            <Link href="/" className="text-sm text-muted transition-colors hover:text-gold">
               View Store
             </Link>
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-gold/20 flex items-center justify-center">
+              <div className="flex h-8 w-8 items-center justify-center border border-gold/30 bg-gold/10">
                 <span className="text-xs font-bold text-gold">
                   {session.user.name?.[0] ?? "A"}
                 </span>
               </div>
               <div>
                 <p className="text-sm font-medium text-navy">{session.user.name}</p>
-                <p className="text-[10px] text-charcoal/40 capitalize">{session.user.role}</p>
+                <p className="text-[10px] uppercase tracking-wide text-muted">{session.user.role}</p>
               </div>
             </div>
           </div>

@@ -6,6 +6,8 @@ import {
   categories,
   brands,
   products,
+  stores,
+  productStock,
   roles,
   permissions,
   rolePermissions,
@@ -93,6 +95,17 @@ async function seed() {
   }));
   await db.insert(rolePermissions).values(superAdminPerms);
 
+  // ── STORES (multi-brand / multi-town) ────────────────────────────────
+  console.log("  Creating stores...");
+  const storeDefs = [
+    { slug: "accra-main", name: "Nobleman Musical Center — Accra", brandName: "Nobleman Musical Center", town: "Accra", region: "Greater Accra", isPrimary: true },
+    { slug: "kumasi", name: "Nobleman Musical Center — Kumasi", brandName: "Nobleman Musical Center", town: "Kumasi", region: "Ashanti", isPrimary: false },
+  ];
+  const insertedStores = await db.insert(stores).values(storeDefs).returning();
+  const storeMap = Object.fromEntries(insertedStores.map((s) => [s.slug, s.id]));
+  const accraId = storeMap["accra-main"];
+  console.log(`  ✅ Created ${insertedStores.length} stores`);
+
   // ── ADMIN USER ───────────────────────────────────────────────────────
   console.log("  Creating admin user...");
   const adminPassword = process.env.SEED_ADMIN_PASSWORD || "admin123";
@@ -105,6 +118,7 @@ async function seed() {
       passwordHash: adminHash,
       name: "Nobleman Admin",
       role: "super_admin",
+      storeId: accraId,
       emailVerified: new Date(),
     })
     .returning();
@@ -124,6 +138,7 @@ async function seed() {
       passwordHash: cashierHash,
       name: "Kwame Mensah",
       role: "cashier",
+      storeId: accraId,
       emailVerified: new Date(),
     })
     .returning();
@@ -135,6 +150,7 @@ async function seed() {
       passwordHash: managerHash,
       name: "Ama Darko",
       role: "manager",
+      storeId: accraId,
       emailVerified: new Date(),
     })
     .returning();
@@ -267,6 +283,16 @@ async function seed() {
     .returning();
   console.log(`  ✅ Created ${insertedProducts.length} products`);
 
+  // ── PRODUCT STOCK (per store) ────────────────────────────────────────
+  console.log("  Seeding per-store stock...");
+  const stockRows = insertedProducts.flatMap((p) => [
+    { productId: p.id, storeId: storeMap["accra-main"], quantity: p.stock },
+    // The second town carries a smaller allocation of the shared catalog.
+    { productId: p.id, storeId: storeMap["kumasi"], quantity: Math.floor(p.stock / 2) },
+  ]);
+  await db.insert(productStock).values(stockRows);
+  console.log(`  ✅ Seeded stock for ${insertedProducts.length} products across ${insertedStores.length} stores`);
+
   // ── POS TERMINAL & SHIFTS ────────────────────────────────────────────
   console.log("  Creating POS data...");
   const [terminal] = await db
@@ -278,6 +304,7 @@ async function seed() {
     .insert(posShifts)
     .values({
       terminalId: terminal.id,
+      storeId: accraId,
       openedByUserId: cashier.id,
       openingCash: "500.00",
       status: "open",
@@ -288,6 +315,7 @@ async function seed() {
     .insert(posShifts)
     .values({
       terminalId: terminal.id,
+      storeId: accraId,
       openedByUserId: cashier.id,
       openingCash: "500.00",
       closingCash: "2350.00",
@@ -310,6 +338,7 @@ async function seed() {
       .values({
         shiftId: closedShift.id,
         terminalId: terminal.id,
+        storeId: accraId,
         cashierUserId: cashier.id,
         customerName: i % 2 === 0 ? "Walk-in Customer" : "Pastor Mensah",
         customerPhone: i % 2 === 0 ? undefined : "+233 20 123 4567",

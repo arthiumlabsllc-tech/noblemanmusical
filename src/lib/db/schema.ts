@@ -72,6 +72,34 @@ export const discountTypeEnum = pgEnum("discount_type", ["percentage", "fixed"])
 export const refundMethodEnum = pgEnum("refund_method", ["cash", "momo", "original"]);
 
 // ============================================================================
+// STORES (multi-brand / multi-town)
+// ============================================================================
+
+export const stores = pgTable(
+  "stores",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => `sto_${crypto.randomUUID()}`),
+    slug: varchar("slug", { length: 255 }).notNull().unique(),
+    name: varchar("name", { length: 255 }).notNull(),
+    brandName: varchar("brand_name", { length: 255 }),
+    town: varchar("town", { length: 120 }),
+    region: varchar("region", { length: 120 }),
+    address: text("address"),
+    phone: varchar("phone", { length: 20 }),
+    logoUrl: text("logo_url"),
+    isPrimary: boolean("is_primary").notNull().default(false),
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => ({
+    slugIdx: uniqueIndex("stores_slug_idx").on(table.slug),
+    activeIdx: index("stores_active_idx").on(table.isActive),
+  })
+);
+
+// ============================================================================
 // USERS & AUTH (Auth.js v5)
 // ============================================================================
 
@@ -86,6 +114,7 @@ export const users = pgTable(
     name: varchar("name", { length: 255 }),
     phone: varchar("phone", { length: 20 }),
     role: userRoleEnum("role").notNull().default("customer"),
+    storeId: text("store_id").references(() => stores.id),
     image: text("image"),
     emailVerified: timestamp("email_verified", { mode: "date" }),
     marketingOptIn: boolean("marketing_opt_in").notNull().default(false),
@@ -271,6 +300,34 @@ export const products = pgTable(
 );
 
 // ============================================================================
+// PRODUCT STOCK (shared catalog, per-store quantity)
+// ============================================================================
+
+export const productStock = pgTable(
+  "product_stock",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => `ps_${crypto.randomUUID()}`),
+    productId: text("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    storeId: text("store_id")
+      .notNull()
+      .references(() => stores.id, { onDelete: "cascade" }),
+    quantity: integer("quantity").notNull().default(0),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => ({
+    productStoreIdx: uniqueIndex("product_stock_product_store_idx").on(
+      table.productId,
+      table.storeId
+    ),
+    storeIdx: index("product_stock_store_idx").on(table.storeId),
+  })
+);
+
+// ============================================================================
 // PRODUCT VARIANTS
 // ============================================================================
 
@@ -332,6 +389,7 @@ export const orders = pgTable(
       .$defaultFn(() => `ord_${crypto.randomUUID()}`),
     orderNumber: varchar("order_number", { length: 50 }).notNull().unique(),
     userId: text("user_id").references(() => users.id),
+    storeId: text("store_id").references(() => stores.id),
     email: varchar("email", { length: 255 }),
     phone: varchar("phone", { length: 20 }),
     status: orderStatusEnum("status").notNull().default("pending"),
@@ -634,6 +692,7 @@ export const posShifts = pgTable(
     terminalId: text("terminal_id")
       .notNull()
       .references(() => posTerminals.id),
+    storeId: text("store_id").references(() => stores.id),
     openedByUserId: text("opened_by_user_id")
       .notNull()
       .references(() => users.id),
@@ -669,6 +728,7 @@ export const posSales = pgTable(
     terminalId: text("terminal_id")
       .notNull()
       .references(() => posTerminals.id),
+    storeId: text("store_id").references(() => stores.id),
     cashierUserId: text("cashier_user_id")
       .notNull()
       .references(() => users.id),
@@ -875,4 +935,21 @@ export const rolesRelations = relations(roles, ({ many }) => ({
 
 export const permissionsRelations = relations(permissions, ({ many }) => ({
   roles: many(rolePermissions),
+}));
+
+export const storesRelations = relations(stores, ({ many }) => ({
+  productStock: many(productStock),
+  users: many(users),
+  orders: many(orders),
+}));
+
+export const productStockRelations = relations(productStock, ({ one }) => ({
+  product: one(products, {
+    fields: [productStock.productId],
+    references: [products.id],
+  }),
+  store: one(stores, {
+    fields: [productStock.storeId],
+    references: [stores.id],
+  }),
 }));

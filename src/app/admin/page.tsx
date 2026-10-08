@@ -1,129 +1,122 @@
 import Link from "next/link";
 import { formatGHS } from "@/lib/utils/formatGHS";
+import { getDashboardStats, getInventory, getRecentOrders } from "@/lib/data/admin";
+import { getActiveStore } from "@/lib/data/stores";
+import { Badge, Card, CardHeader, Flash, PageHeader, StatCard } from "@/components/admin/ui";
 
-// Placeholder data — will be replaced with DB queries
-const stats = [
-  { label: "Total Revenue", value: formatGHS(45299.90), change: "+12.5%", trend: "up" },
-  { label: "Orders", value: "128", change: "+8.2%", trend: "up" },
-  { label: "Products", value: "36", change: "+3", trend: "up" },
-  { label: "Customers", value: "89", change: "+15.3%", trend: "up" },
-];
-
-const recentOrders = [
-  { id: "NMC-ABC123", customer: "Pastor Mensah", total: 4599.99, status: "paid", date: "2024-09-27" },
-  { id: "NMC-DEF456", customer: "Grace Chapel", total: 12999.99, status: "processing", date: "2024-09-26" },
-  { id: "NMC-GHI789", customer: "Kwame A.", total: 699.99, status: "shipped", date: "2024-09-25" },
-  { id: "NMC-JKL012", customer: "Joy FM", total: 2199.99, status: "delivered", date: "2024-09-24" },
-  { id: "NMC-MNO345", customer: "Ama D.", total: 549.99, status: "pending", date: "2024-09-24" },
-];
-
-const lowStockProducts = [
-  { name: "Gibson Les Paul Standard '50s", stock: 3, price: 12999.99 },
-  { name: "Roland TD-17KV Electronic Kit", stock: 3, price: 7499.99 },
-  { name: "AKAI Force Standalone", stock: 3, price: 4999.99 },
-  { name: "Yamaha Stagepas 400i", stock: 3, price: 5999.99 },
-  { name: "Fender Blues Junior IV", stock: 5, price: 3999.99 },
-];
-
-const statusColors: Record<string, string> = {
-  pending: "bg-charcoal/10 text-charcoal",
-  confirmed: "bg-blue-100 text-blue-700",
-  processing: "bg-gold/10 text-gold",
-  paid: "bg-kente-green/10 text-kente-green",
-  shipped: "bg-blue-100 text-blue-700",
-  delivered: "bg-kente-green/10 text-kente-green",
-  cancelled: "bg-kente-red/10 text-kente-red",
-  refunded: "bg-charcoal/10 text-charcoal",
+const statusTone: Record<string, "neutral" | "green" | "gold" | "red"> = {
+  pending: "neutral",
+  confirmed: "gold",
+  processing: "gold",
+  paid: "green",
+  shipped: "green",
+  delivered: "green",
+  cancelled: "red",
+  refunded: "red",
 };
 
-export default function AdminDashboardPage() {
+const quickActions = [
+  { href: "/admin/inventory", title: "Adjust Stock", sub: "Add or set per-store quantities" },
+  { href: "/admin/discounts", title: "Create Discount", sub: "Percentage or fixed codes" },
+  { href: "/admin/employees", title: "Register Employee", sub: "Staff login, role & store" },
+];
+
+export default async function AdminDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ msg?: string; error?: string }>;
+}) {
+  const sp = await searchParams;
+  const activeStore = await getActiveStore();
+  const [stats, orders, inventory] = await Promise.all([
+    getDashboardStats(),
+    getRecentOrders(5),
+    getInventory(activeStore.id),
+  ]);
+  const lowStock = inventory.filter((i) => i.storeQty <= 5).slice(0, 5);
+
   return (
     <div className="space-y-8">
-      {/* Stats */}
+      <PageHeader
+        title="Dashboard"
+        subtitle={`Overview for ${activeStore.name}`}
+      />
+      <Flash msg={sp.msg} error={sp.error} />
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <div key={stat.label} className="rounded-lg border border-charcoal/10 bg-white p-6">
-            <p className="text-xs font-medium uppercase tracking-wider text-charcoal/60">{stat.label}</p>
-            <p className="mt-2 text-2xl font-bold text-navy">{stat.value}</p>
-            <p className="mt-1 text-xs text-kente-green">{stat.change} from last month</p>
-          </div>
-        ))}
+        <StatCard label="Revenue" value={formatGHS(stats.revenue)} hint="paid orders" />
+        <StatCard label="Orders" value={String(stats.orders)} />
+        <StatCard label="Products" value={String(stats.products)} />
+        <StatCard label="Low Stock" value={String(stats.lowStock)} />
       </div>
 
-      {/* Two column layout */}
-      <div className="grid gap-8 lg:grid-cols-2">
-        {/* Recent orders */}
-        <div className="rounded-lg border border-charcoal/10 bg-white">
-          <div className="flex items-center justify-between border-b border-charcoal/10 px-6 py-4">
-            <h2 className="font-display text-lg font-bold text-navy">Recent Orders</h2>
-            <Link href="/admin/orders" className="text-xs font-medium text-gold hover:text-gold-light">
-              View all →
-            </Link>
-          </div>
-          <div className="divide-y divide-charcoal/5">
-            {recentOrders.map((order) => (
-              <div key={order.id} className="flex items-center justify-between px-6 py-3">
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader
+            title="Recent Orders"
+            right={
+              <Link href="/admin/orders" className="text-xs font-medium text-gold hover:text-navy">
+                View all →
+              </Link>
+            }
+          />
+          <div className="divide-y divide-line">
+            {orders.map((o) => (
+              <div key={o.orderNumber} className="flex items-center justify-between px-6 py-3">
                 <div>
-                  <p className="text-sm font-medium text-navy">{order.id}</p>
-                  <p className="text-xs text-charcoal/60">{order.customer}</p>
+                  <p className="text-sm font-medium text-navy">{o.orderNumber}</p>
+                  <p className="text-xs text-muted">{o.customer} · {o.date}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-bold text-navy" style={{ fontVariantNumeric: "tabular-nums" }}>
-                    {formatGHS(order.total)}
-                  </p>
-                  <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${statusColors[order.status]}`}>
-                    {order.status}
-                  </span>
+                  <p className="text-sm font-semibold text-navy">{formatGHS(o.total)}</p>
+                  <Badge tone={statusTone[o.status] ?? "neutral"}>{o.status}</Badge>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </Card>
 
-        {/* Low stock alerts */}
-        <div className="rounded-lg border border-charcoal/10 bg-white">
-          <div className="flex items-center justify-between border-b border-charcoal/10 px-6 py-4">
-            <h2 className="font-display text-lg font-bold text-navy">Low Stock Alerts</h2>
-            <Link href="/admin/products" className="text-xs font-medium text-gold hover:text-gold-light">
-              Manage →
-            </Link>
-          </div>
-          <div className="divide-y divide-charcoal/5">
-            {lowStockProducts.map((product) => (
-              <div key={product.name} className="flex items-center justify-between px-6 py-3">
+        <Card>
+          <CardHeader
+            title={`Low Stock · ${activeStore.town ?? "Store"}`}
+            right={
+              <Link href="/admin/inventory" className="text-xs font-medium text-gold hover:text-navy">
+                Manage →
+              </Link>
+            }
+          />
+          <div className="divide-y divide-line">
+            {lowStock.length === 0 && (
+              <p className="px-6 py-6 text-sm text-muted">No low-stock items in this store.</p>
+            )}
+            {lowStock.map((p) => (
+              <div key={p.productId} className="flex items-center justify-between px-6 py-3">
                 <div>
-                  <p className="text-sm font-medium text-navy">{product.name}</p>
-                  <p className="text-xs text-charcoal/60">{formatGHS(product.price)}</p>
+                  <p className="text-sm font-medium text-navy">{p.name}</p>
+                  <p className="text-xs text-muted">{p.brand} · {formatGHS(p.price)}</p>
                 </div>
-                <span className={`rounded-full px-3 py-1 text-xs font-bold ${
-                  product.stock <= 3 ? "bg-kente-red/10 text-kente-red" : "bg-gold/10 text-gold"
-                }`}>
-                  {product.stock} left
-                </span>
+                <Badge tone={p.storeQty <= 3 ? "red" : "gold"}>{p.storeQty} left</Badge>
               </div>
             ))}
           </div>
-        </div>
+        </Card>
       </div>
 
-      {/* Quick actions */}
-      <div className="rounded-lg border border-charcoal/10 bg-white p-6">
-        <h2 className="mb-4 font-display text-lg font-bold text-navy">Quick Actions</h2>
-        <div className="grid gap-3 sm:grid-cols-3">
-          <Link href="/admin/products/new" className="rounded-md border border-charcoal/10 p-4 text-center transition-colors hover:border-gold hover:bg-gold/5">
-            <p className="text-sm font-semibold text-navy">Add Product</p>
-            <p className="mt-1 text-xs text-charcoal/60">Create a new listing</p>
-          </Link>
-          <Link href="/admin/orders" className="rounded-md border border-charcoal/10 p-4 text-center transition-colors hover:border-gold hover:bg-gold/5">
-            <p className="text-sm font-semibold text-navy">Manage Orders</p>
-            <p className="mt-1 text-xs text-charcoal/60">View & process orders</p>
-          </Link>
-          <Link href="/admin/quotes" className="rounded-md border border-charcoal/10 p-4 text-center transition-colors hover:border-gold hover:bg-gold/5">
-            <p className="text-sm font-semibold text-navy">Respond to Quotes</p>
-            <p className="mt-1 text-xs text-charcoal/60">Handle B2B inquiries</p>
-          </Link>
+      <Card>
+        <CardHeader title="Quick Actions" />
+        <div className="grid gap-3 p-6 sm:grid-cols-3">
+          {quickActions.map((a) => (
+            <Link
+              key={a.href}
+              href={a.href}
+              className="border border-line p-4 transition-colors hover:border-gold hover:bg-gold/5"
+            >
+              <p className="text-sm font-semibold text-navy">{a.title}</p>
+              <p className="mt-1 text-xs text-muted">{a.sub}</p>
+            </Link>
+          ))}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
